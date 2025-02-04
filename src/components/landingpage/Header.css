@@ -1,0 +1,48 @@
+.arrow-header {
+  display: inline-block;  
+  height: 40px;
+  margin:0;
+  position: relative;
+  line-height: 1.75em;
+  padding-left: 1em;
+  padding-right: 2em;
+  background: #00114b ;
+  color: rgb(255, 255, 255);
+  text-decoration: none;
+  border-left:solid #face00 8px;
+  font-size: 1.5rem;
+  user-select: none;
+  margin-top:50px;
+}
+
+.arrow-header:after { 
+  content: "";
+  position: absolute;
+  border-bottom: 20px solid transparent;
+  border-top: 20px solid transparent;
+  height: 0px;
+  width: 0px;
+  margin-right: -19.9px;
+  right: 0;
+  border-left: 20px solid #00114b;
+}
+
+
+@media (max-width:364px){
+    .arrow-header {
+        line-height: 2.5em;
+        font-size: 1rem;
+        
+      }
+    
+}
+
+@media (max-width:265px){
+    .arrow-header{
+        line-height: 3.4em;
+        max-width:216px;
+        font-size:0.75rem
+    }
+}
+
+
