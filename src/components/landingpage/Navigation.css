@@ -85,7 +85,7 @@ a.dropdown-item {
     background-color: #00114B !important;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 991.2px) {
     .dropdown-toggle {
         min-width: 100px;
     }
@@ -131,7 +131,7 @@ a.dropdown-item {
     }
 }
 
-@media (min-width: 992px){
+@media (min-width: 991.5px){
     .dropdown-toggle {
         
         border-right: 1px solid #00114b5d !important;

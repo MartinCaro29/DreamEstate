@@ -34,11 +34,11 @@ const Reviews = () => {
   return (
     <Container className="py-5">
       <div className="text-center mb-5">
-        <h1 className="mb-3">DreamEstate - Shtëpia Juaj, Ëndrra Juaj</h1>
+        <h1 className="mb-3" style={{color:'#00114B'}}>DreamEstate - Shtëpia Juaj, Ëndrra Juaj</h1>
         <p className="lead text-muted">
           Udhëtimi juaj drejt gjetjes së shtëpisë së përsosur fillon këtu!
         </p>
-        <p className="text-muted">
+        <p className="text-muted" style={{color:'#00114B'}}>
           Zbuloni një përgjigjedhje unike të pronave, të përshtatura për stilin dhe ëndrrat tuaja.
           Pavarësisht nëse kërkoni një apartament të vogël, një vilë luksoze apo një mundësi fitimprurëse investimi,
           DreamEstate është këtu për t'ju udhëhequr në çdo hap të rrugës.
@@ -60,7 +60,7 @@ const Reviews = () => {
               </div>
               <Card.Body style={{display:'flex', flexDirection:'column', justifyContent:"space-between"}}>
                 <div>
-                <div className='h3'>{testimonial.name}</div>
+                <div className='h3' style={{color:'#00114B'}}>{testimonial.name}</div>
                 <Card.Text className="text-muted mb-3">
                   {testimonial.text}
                 </Card.Text>

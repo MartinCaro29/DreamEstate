@@ -1,14 +1,14 @@
-h5{
+.footer-heading{
     color: #face00 !important
 }
 
 .footer-description{
     text-align: left;
-    font-size:0.8rem !important
+    font-size:0.86rem !important
 }
 
 .footer-link{
-    font-size:0.8rem;
+    font-size:0.9rem;
     padding: 0 0.75rem
 }
 
@@ -22,7 +22,17 @@ h5{
     margin-bottom: 0.5rem;
 }
 
+@media (max-width:1200px){
+    .footer-link{
+        font-size:0.8rem;
+        padding: 0 0.60rem
+    }
 
+    .fast-links{
+        width:73%;
+    }
+
+}
 @media (max-width:991px){
     .footer-logo-title{
         font-size:1.5rem !important
@@ -30,10 +40,15 @@ h5{
     .footer-logo-subtitle{
         font-size:0.7rem !important;
     }
-
-    .footer-link{
-        font-size: 0.65rem;
-        padding: 0 0.45rem !important
+.fast-links{
+    width:80%
+}
+   
+   
+    
+    .logo-and-links-container{
+        flex-direction: column !important;
+        gap:1rem
     }
 }
 @media (max-width: 767.5px){
@@ -44,25 +59,27 @@ h5{
     .fast-links{
         margin-right:auto ;
     }
-    
-    .logo-and-links-container{
-        flex-direction: column !important;
-        gap:1rem
-    }
-}
 
-@media (min-width:485px){
-    .footer-link:nth-child(-n+8){
-        border-right:1px solid white
+    .footer-link{
+        font-size: 0.65rem;
+        padding: 0 0.45rem !important
     }
 
 }
-@media (max-width:484px){
+
+@media (min-width:506px){
+    .footer-link:not(:last-child) {
+        border-right: 1px solid white;
+      }
+      
+
+}
+@media (max-width:505px){
     .nav-links-container{
         flex-direction: column;
 
     }
-
+    
     .nav-links-container a{
         margin-bottom: 0.5rem;
     }

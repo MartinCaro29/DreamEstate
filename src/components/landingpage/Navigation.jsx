@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Navbar, Nav, Container, Dropdown, NavDropdown } from 'react-bootstrap';
-import './Navigation.css'
-import NavbarLogo from '../../images/dreamestatenav.png'
+import { UserContext } from '../auth/UserContext';
+import './Navigation.css';
+import NavbarLogo from '../../images/dreamestatenav.png';
 
 const Navigation = () => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Blerje');
+  const { userInfo, setUserInfo } = useContext(UserContext);
 
   const categories = [
     'Blerje',
@@ -14,26 +16,30 @@ const Navigation = () => {
     'Kerko ne harte'
   ];
 
+  const handleLogout = () => {
+    setUserInfo({});
+    window.location.reload();
+  };
+
   return (
     <>
       <div className="bg-navy text-white py-3">
         <Container className="d-flex top-nav-container align-items-center">
-        <a href="#" style={{ textDecoration: 'none', color: 'inherit', cursor:'pointer'}} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-  <div className="d-flex align-items-center gap-2">
-    <img className="logo-img" src={NavbarLogo} style={{ width: '70px', height: '70px' }} />
-    <div className="logo-text">
-      <div className="h2" style={{ textAlign: 'left', margin: 0 }}>DreamEstate</div>
-      <div className="h6" style={{ textAlign: 'left', margin: 0 }}>Shtepia Juaj, Endrra Juaj</div>
-    </div>
-    <div className="h6 motto-text" style={{ textAlign: 'left', margin: 'auto 0px', marginLeft: '20px' }}>
-      Gjeni shtepine e endrrave tuaja!
-    </div>
-  </div>
-</a>
+          <a href="#" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div className="d-flex align-items-center gap-2">
+              <img className="logo-img" src={NavbarLogo} style={{ width: '70px', height: '70px' }} />
+              <div className="logo-text">
+                <div className="h2" style={{ textAlign: 'left', margin: 0 }}>DreamEstate</div>
+                <div className="h6" style={{ textAlign: 'left', margin: 0 }}>Shtepia Juaj, Endrra Juaj</div>
+              </div>
+              <div className="h6 motto-text" style={{ textAlign: 'left', margin: 'auto 0px', marginLeft: '20px' }}>
+                Gjeni shtepine e endrrave tuaja!
+              </div>
+            </div>
+          </a>
 
           <div className="social-container">
             <div className="d-flex align-items-center justify-content-around">
-
               <a href="#" className="text-white">
                 <i className="bi bi-facebook fs-5"></i>
               </a>
@@ -65,11 +71,17 @@ const Navigation = () => {
               <Nav.Link href="#kush-jemi">Kush jemi</Nav.Link>
               <Nav.Link href="#blogu">Blogu</Nav.Link>
               <Nav.Link href="#kontakt">Kontakt</Nav.Link>
-              <Nav.Link href="#login">Login</Nav.Link>
-              <Nav.Link href="#llogaria">Llogaria</Nav.Link>
+              {Object.keys(userInfo).length === 0 ? (
+                <Nav.Link href="/login">Autentikimi</Nav.Link>
+              ) : (
+                <>
+                  <Nav.Link href="#llogaria">Llogaria</Nav.Link>
+                  <Nav.Link onClick={handleLogout}>Dilni</Nav.Link>
+                </>
+              )}
             </Nav>
         
-            <div className="d-flex search-container" >
+            <div className="d-flex search-container">
               <Dropdown>
                 <Dropdown.Toggle 
                   variant="light" 
@@ -116,7 +128,6 @@ const Navigation = () => {
                 </button>
               </div>
             </div>
-
           </Navbar.Collapse>
         </Container>
       </Navbar>

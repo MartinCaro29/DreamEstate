@@ -1,0 +1,13 @@
+# Node.js modules
+node_modules
+
+# dotenv environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
