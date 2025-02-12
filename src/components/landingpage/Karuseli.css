@@ -59,7 +59,7 @@
     padding: 0 1rem
 }
 
-.nav-pills a:hover{
+.nav-pills a:not(.active):hover{
     color: #fff1b5;
     transition: 0.3s ease-in-out;
 }

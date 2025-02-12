@@ -65,13 +65,14 @@ const FooterNav = () => {
                   </Link>
                 </li>
               ))}
-              {additionalLinks.map((link, index) => (
+              {additionalLinks.slice(0, 3).map((link, index) => (
                 <li key={index}>
                   <Link to={link.path} className="text-light text-decoration-none">
                     {link.name}
                   </Link>
                 </li>
               ))}
+
             </ul>
           </div>
 

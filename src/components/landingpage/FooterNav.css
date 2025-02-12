@@ -71,6 +71,8 @@
     .footer-link:not(:last-child) {
         border-right: 1px solid white;
       }
+
+      
       
 
 }
@@ -78,6 +80,11 @@
     .nav-links-container{
         flex-direction: column;
 
+    }
+
+    .footer-link{
+        font-size: 1rem;
+        
     }
     
     .nav-links-container a{

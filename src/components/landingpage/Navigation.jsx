@@ -25,7 +25,7 @@ const Navigation = () => {
     <>
       <div className="bg-navy text-white py-3">
         <Container className="d-flex top-nav-container align-items-center">
-          <a href="#" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <a href="/" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="d-flex align-items-center gap-2">
               <img className="logo-img" src={NavbarLogo} style={{ width: '70px', height: '70px' }} />
               <div className="logo-text">

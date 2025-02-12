@@ -1,5 +1,3 @@
-
-
 .carousel-img {
     height: 700px;                    
     object-fit: cover; 
@@ -67,12 +65,13 @@
     padding: 0 1rem
 }
 
+.nav-pills-buy a:not(.active):hover{
+    color: #fff1b5;
+    transition: 0.3s ease-in-out;
+}
+
 .nav-pills-buy .active {
     color:#face00
-}
-.nav-pills a:hover{
-    color: #face00;
-    transition: 0.3s ease-in-out;
 }
 
 .search-container-buy {
@@ -90,14 +89,14 @@
 
 
 /* Ensure input and button fit well within the border */
-.search-container-carousel input {
+.search-container-buy input {
     border-radius: 0.375rem 0 0 0.375rem !important;
     border: none;
     outline: none;
     box-shadow: none;
 }
 
-.search-container-carousel button {
+.search-container-buy button {
     border-radius: 0 0.375rem 0.375rem 0 !important;
     border: none;
     outline: none;
@@ -105,8 +104,8 @@
 }
 
 /* Remove any additional focus styles */
-.search-container-carousel input:focus,
-.search-container-carousel button:focus {
+.search-container-buy input:focus,
+.search-container-buy button:focus {
     outline: none;
     box-shadow: none;
 }
@@ -117,12 +116,12 @@
     .title-content {
         max-width: 1140px; /* container-xl */
     }
-    .nav-pills{
+    .nav-pills-buy{
         max-width:41%;
         min-width:41%;
     }
 
-    .search-container-carousel{
+    .search-container-buy{
        
         max-width:41%;
         min-width:41%;
@@ -136,12 +135,12 @@
         max-width: 960px; /* container-lg */
     }
 
-    .nav-pills{
+    .nav-pills-buy{
         max-width:50%;
         min-width:50%;
     }
 
-    .search-container-carousel{
+    .search-container-buy{
        
         max-width:50%;
         min-width:50%;
@@ -154,14 +153,14 @@
         max-width: 720px; /* container-md */
     }
 
-    .nav-pills{
+    .nav-pills-buy{
         max-width:67%;
         min-width:67%
     }
-
-    .search-container-carousel{
+    
+    .search-container-buy{
        
-        max-width: 67% !important;
+        max-width: 67%;
         min-width: 67%;
         
     }
@@ -170,16 +169,19 @@
 @media (max-width: 768px) {
     .title-content {
         max-width: 540px; /* container-sm */
-        padding: 0 1rem; /* Reduced padding for smaller screens */
+        padding: 0 0.6rem; /* Reduced padding for smaller screens */
+    }
+
+    .nav-pills-buy a{
+    
+        padding: 0 0.5rem
     }
 
     .title-container {
         top: 40%;
     }
 
-    .nav-pills a {
-        padding: 0 0.5rem;
-    }
+    
 }
 
 @media (max-width: 576px) {
@@ -187,17 +189,17 @@
         padding: 0 0.5rem; /* Minimal padding for mobile */
     }
 
-    .nav-pills{
-        
+    .nav-pills-buy{
         min-width: 280px;
+        max-width: 350px;
     }
 
-    .nav-pills a{
+    .nav-pills-buy a{
     
         padding: 0 0.3rem
     }
 
-    .search-container-carousel{
+    .search-container-buy{
        
         max-width:90%;
         min-width: 280px;

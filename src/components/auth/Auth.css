@@ -1,8 +1,8 @@
-h1.text-center, label{
+h1.text-center, p.text-center, label{
     color: #00114B 
 }
 
-a.auth-link{
+a.auth-link, button.auth-link{
     color: #d0aa00 !important
 }
 
