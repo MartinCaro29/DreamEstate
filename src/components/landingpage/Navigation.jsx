@@ -3,22 +3,45 @@ import { Navbar, Nav, Container, Dropdown, NavDropdown } from 'react-bootstrap';
 import { UserContext } from '../auth/UserContext';
 import './Navigation.css';
 import NavbarLogo from '../../images/dreamestatenav.png';
+import { useNavigate } from 'react-router-dom';
 
 const Navigation = () => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Blerje');
   const { userInfo, setUserInfo } = useContext(UserContext);
+  const navigate = useNavigate();
 
-  const categories = [
+  // Keep "Shitje" in this array for the first dropdown
+  const allCategories = [
     'Blerje',
     'Shitje',
     'Qera',
     'Kerko ne harte'
   ];
 
+  // Remove "Shitje" from the search dropdown
+  const searchCategories = [
+    'Blerje',
+    'Qera',
+    'Kerko ne harte'
+  ];
+
   const handleLogout = () => {
+    localStorage.removeItem('userId');
     setUserInfo({});
-    window.location.reload();
+    navigate('/login');
+  };
+
+  const handleSearch = () => {
+    if (!selectedCategory) {
+      setSelectedCategory('Blerje');
+    }
+    // Redirect to the new URL with category and search value
+    const category = selectedCategory || 'Blerje';
+    const query = searchValue.trim();
+
+    // Navigate to the new URL with query parameters
+    navigate(`/${category.toLowerCase().replace(/\s/g, '')}?q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -60,31 +83,38 @@ const Navigation = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto flex-grow-1">
-              <Nav.Link href="#home">Kreu</Nav.Link>
+              <Nav.Link href="/">Kreu</Nav.Link>
               <NavDropdown title="Prona" id="basic-nav-dropdown">
-                {categories.map((category) => (
-                  <NavDropdown.Item className="nav-dropdown-link" key={category} href={`#${category.toLowerCase()}`}>
-                    {category}
-                  </NavDropdown.Item>
-                ))}
+                {allCategories.map((category) => {
+                  const pillValue = category.toLowerCase().replace(/\s/g, '');  // Clean up the category name
+                  return (
+                    <NavDropdown.Item
+                      className="nav-dropdown-link"
+                      key={pillValue}
+                      href={`/${pillValue}`}  // Use cleaned-up value in href
+                    >
+                      {category}
+                    </NavDropdown.Item>
+                  );
+                })}
               </NavDropdown>
-              <Nav.Link href="#kush-jemi">Kush jemi</Nav.Link>
-              <Nav.Link href="#blogu">Blogu</Nav.Link>
-              <Nav.Link href="#kontakt">Kontakt</Nav.Link>
+              <Nav.Link href="/kushjemi">Kush jemi</Nav.Link>
+              <Nav.Link href="/blog">Blogu</Nav.Link>
+              <Nav.Link href="/kontakt">Kontakt</Nav.Link>
               {Object.keys(userInfo).length === 0 ? (
                 <Nav.Link href="/login">Autentikimi</Nav.Link>
               ) : (
                 <>
-                  <Nav.Link href="#llogaria">Llogaria</Nav.Link>
+                  <Nav.Link href="/llogaria">Llogaria</Nav.Link>
                   <Nav.Link onClick={handleLogout}>Dilni</Nav.Link>
                 </>
               )}
             </Nav>
-        
+
             <div className="d-flex search-container">
               <Dropdown>
-                <Dropdown.Toggle 
-                  variant="light" 
+                <Dropdown.Toggle
+                  variant="light"
                   id="dropdown-basic"
                   className="border border-end-0 rounded-start rounded-0 bg-light text-dark py-1"
                   style={{ borderRadius: '0.375rem 0 0 0.375rem' }}
@@ -93,14 +123,17 @@ const Navigation = () => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  {categories.map((category) => (
-                    <Dropdown.Item 
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      {category}
-                    </Dropdown.Item>
-                  ))}
+                  {searchCategories.map((category) => {
+                    const pillValue = category.toLowerCase().replace(/\s/g, '');  // Clean up the category name
+                    return (
+                      <Dropdown.Item
+                        key={pillValue}
+                        onClick={() => setSelectedCategory(category)}
+                      >
+                        {category}
+                      </Dropdown.Item>
+                    );
+                  })}
                 </Dropdown.Menu>
               </Dropdown>
 
@@ -111,18 +144,19 @@ const Navigation = () => {
                   placeholder="Kerko prona..."
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
-                  style={{ 
+                  style={{
                     paddingRight: '3.5rem',
                     height: '100%',
                     borderRadius: '0 0.375rem 0.375rem 0'
                   }}
                 />
-                <button 
+                <button
                   className="btn btn-primary position-absolute top-0 end-0 h-100 py-1"
-                  style={{ 
+                  style={{
                     borderRadius: '0 0.375rem 0.375rem 0',
                     padding: '0.25rem 0.75rem'
                   }}
+                  onClick={handleSearch}
                 >
                   <i className="bi bi-search"></i>
                 </button>

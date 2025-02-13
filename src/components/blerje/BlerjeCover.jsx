@@ -24,6 +24,7 @@ function BlerjeCover() {
         const category = selectedNavPill || 'blerje';
         const query = searchValue.trim();
         navigate(`/${category}?q=${encodeURIComponent(query)}`);
+        window.location.reload();
     };
 
     return (
@@ -47,7 +48,17 @@ function BlerjeCover() {
                                     <a
                                         style={{ cursor: 'pointer' }}
                                         className={selectedNavPill === pillValue ? 'active' : ''}
-                                        onClick={() => setSelectedNavPill(pillValue)}
+                                        // For "Shitje", we use the href, but for other pills, use onClick for programmatic navigation
+                                        onClick={(e) => {
+                                            if (pillValue === 'shitje') {
+                                                // For "Shitje", we navigate directly using href (no refresh)
+                                                window.location.href = '/shitje';
+                                            } else {
+                                                // For other categories, we prevent the default href behavior and update the state
+                                                e.preventDefault(); // Prevent page refresh
+                                                setSelectedNavPill(pillValue); // Set the selected pill state
+                                            }
+                                        }}
                                     >
                                         {pill}
                                     </a>

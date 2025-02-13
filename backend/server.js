@@ -40,8 +40,11 @@ app.use(cors(
     app.use(express.json({ limit: "1000mb", extended: true }));
 
 let userRouter = require("./routes/userRoute");
+let propertyRouter = require("./routes/propertyRoute");
+let favoritesRouter = require("./routes/favoritesRoute");
 app.use(userRouter);   
-
+app.use(propertyRouter); 
+app.use(favoritesRouter);
 app.use('/Images', express.static(path.join(__dirname, 'Images')));
 
 app.listen(5000, () => {

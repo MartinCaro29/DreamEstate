@@ -77,18 +77,10 @@
 
 }
 @media (max-width:505px){
-    .nav-links-container{
-        flex-direction: column;
+    .nav-links-container, .footer-link{
+        display: none;
 
     }
 
-    .footer-link{
-        font-size: 1rem;
-        
-    }
-    
-    .nav-links-container a{
-        margin-bottom: 0.5rem;
-    }
 
 }

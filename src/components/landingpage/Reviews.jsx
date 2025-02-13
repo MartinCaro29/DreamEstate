@@ -45,7 +45,7 @@ const Reviews = () => {
         </p>
       </div>
 
-      <Row className="g-4">
+      <Row className="g-4 mb-5">
         {testimonials.map((testimonial, index) => (
           <Col key={index} md={4}>
             <Card className="h-100 text-center shadow-sm">

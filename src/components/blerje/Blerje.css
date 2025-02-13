@@ -1,0 +1,69 @@
+.button-header{
+    display:flex;
+    justify-content: space-between;
+    align-items:center
+}
+
+.card-title, .card-address{
+    color: #00114B !important;
+    text-align: left
+}
+
+.card-title{
+    font-size:0.94rem
+}
+
+.card-body-buy{
+    min-height:237.5px
+}
+
+.card{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.price{
+    text-align: left;
+}
+.info-icons{
+    text-wrap:nowrap;
+    flex-wrap: nowrap;
+}
+
+.info-icons *{
+    color: #00114B;
+}
+.text-secondary {
+    --bs-text-opacity: 1 !important;
+    color: #00114B  !important;
+}
+@media (max-width:767.5px){
+    .button-header{
+       flex-direction: column;
+       gap:15px;
+    }
+
+    
+}
+
+@media (max-width:364.5px){
+    #dropdown-sort{
+        font-size:0.6rem;
+        min-width:110px;
+        max-width:180px
+    }
+}
+
+@media (max-width: 323px){
+    .card-bottom{
+        flex-direction: column-reverse;
+    }
+
+    .info-icons{
+        margin-bottom: 10px;
+    }
+
+    .text-secondary, .small.text-secondary{
+        font-size: 0.7rem;
+    }
+}

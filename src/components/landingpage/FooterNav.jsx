@@ -29,7 +29,7 @@ const FooterNav = () => {
       return [
         ...commonLinks,
         { name: 'Llogaria', path: '/llogaria' },
-        { name: 'Logout', path: '/logout' },
+        
       ];
     } else {
       return [
@@ -41,6 +41,7 @@ const FooterNav = () => {
 
   const additionalLinks = getAdditionalLinks();
 
+  
   return (
     <footer style={{ backgroundColor: '#00114b' }} className="text-light py-5">
       <div className="container">

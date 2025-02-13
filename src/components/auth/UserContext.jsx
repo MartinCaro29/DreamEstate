@@ -1,17 +1,24 @@
-// Krijimi i nje funksioni i cili lejon kalimin dhe menaxhimin e informacioneve te user-it
-// createContext - librari e react qe lejon kalim e informacionit ne komponente te ndryshme
-import React, { createContext, useState } from "react";
-// Krijimi e nje context ("funksioni per menaxhim e te dhenave te user-it")
+import React, { createContext, useState, useEffect } from "react";
+
+// Create context
 export const UserContext = createContext({});
-// children luajne rolin e props.
-// Te gjitha info mund ti perdorin komponente
-// UserContextProvider therritet tek APP.js
+
+// UserContextProvider Component
 export const UserContextProvider = ({ children }) => {
-// get do te mbaje gjendjen dhe set do te beje ndryshimet
-const [userInfo, setUserInfo] = useState({});
-return (
-<UserContext.Provider value={{ userInfo, setUserInfo }}>
-{children}
-</UserContext.Provider>
-);
+    const [userInfo, setUserInfo] = useState({});
+
+    // On component mount, check if the user is authenticated using the userId
+    useEffect(() => {
+        const userId = localStorage.getItem('userId');  // Retrieve the userId from localStorage
+        if (userId) {
+            // If a userId exists, set the userInfo (you can also fetch more details if needed)
+            setUserInfo({ id: userId });
+        }
+    }, []);
+
+    return (
+        <UserContext.Provider value={{ userInfo, setUserInfo }}>
+            {children}
+        </UserContext.Provider>
+    );
 };

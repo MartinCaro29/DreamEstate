@@ -6,6 +6,10 @@ const propertySchema = new Schema({
     type: String,
     required: true
   },
+  image:{
+    type: String,
+    require:true,
+},
   address: {
     type: String,
     required: true
@@ -18,10 +22,14 @@ const propertySchema = new Schema({
     type: Number,
     required: true
   },
-  price: {
+  price:{
     type: Number,
-    required: true
-  },
+    require: true,
+    min: 0,
+validate: {
+  validator: Number.isInteger,
+},
+},
   beds: {
     type: Number,
     required: true
@@ -36,18 +44,23 @@ const propertySchema = new Schema({
   },
   slug: {
     type: String,
-    required: true,
-    unique: true
+    unique: true,
+    required: true
   },
   category: {
     type: String,
-    enum: ['apartment', 'house', 'villa', 'land'],
+    enum: ['Apartament per 1 person', 'Apartament per shume persona', 'Vile'],
     required: true
   },
   status: {
     type: String,
     enum: ['ne shitje', 'e shitur'],
-    default: 'ne shitje'
+    default: 'ne shitje',
+  },
+  sell_type: {
+    type: String,
+    enum: ['blerje', 'qera'],
+    required:true
   },
   created_at: {
     type: Date,
@@ -56,7 +69,6 @@ const propertySchema = new Schema({
 });
 
 propertySchema.index({ slug: 1 });
-propertySchema.index({ category: 1 });
-propertySchema.index({ status: 1 });
+
 
 module.exports = mongoose.model('Property', propertySchema);

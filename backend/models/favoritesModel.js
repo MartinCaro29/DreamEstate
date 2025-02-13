@@ -22,4 +22,4 @@ const favoritesSchema = new Schema({
 favoritesSchema.index({ user_id: 1 });
 favoritesSchema.index({ property_id: 1 });
 
-module.exports = mongoose.model('Favorite', favoritesSchema);
+module.exports = mongoose.model('Favorites', favoritesSchema);
