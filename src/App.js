@@ -9,6 +9,8 @@ import Login from './components/auth/Login';
 import { UserContextProvider } from './components/auth/UserContext';
 import Register from './components/auth/Register';
 import Blerje from './components/blerje/Blerje';
+import PropertyDetail from './components/blerje/PropertyDetail';
+import MerrMeQera from './components/blerje/MerrMeQera';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/blerje" element={<Blerje/>} />
+      <Route path="/qera" element={<MerrMeQera/>} />
+      <Route path="/property/:slug" element={<PropertyDetail/>} />
       </Routes>
      
       </UserContextProvider>

@@ -1,5 +1,6 @@
 let express = require('express');
-let Property = require('../models/propertyModel'); // Import your Property schema
+let Property = require('../models/propertyModel');
+let Agent = require('../models/agentModel');
 let multer = require('multer');
 let path = require('path');
 let { v4: uuidv4 } = require('uuid');
@@ -43,7 +44,8 @@ const generateSlug = async (name) => {
 app.post("/addProperty", upload.single('image'), async (req, res) => {
     try {
       const {
-        name, address, coordX, coordY, price, beds, baths, area, category, status, sell_type
+        name, address, coordX, coordY, price, beds, baths, area, 
+        category, status, sell_type, agentId
       } = req.body;
   
       // Convert string fields to numbers
@@ -52,14 +54,19 @@ app.post("/addProperty", upload.single('image'), async (req, res) => {
       const parsedPrice = parseFloat(price);
       const parsedBeds = parseInt(beds);
       const parsedBaths = parseInt(baths);
-      const parsedArea = parseInt(area);  // Parse the area as an integer
+      const parsedArea = parseInt(area);
+  
+      // Check if agent exists
+      const agent = await Agent.findById(agentId);
+      if (!agent) {
+        return res.status(404).send("Agent not found");
+      }
   
       if (
-        !name || !address || isNaN(parsedCoordX) || isNaN(parsedCoordY) || isNaN(parsedPrice) ||
-        isNaN(parsedBeds) || isNaN(parsedBaths) || isNaN(parsedArea) || !category || !sell_type || !req.file
+        !name || !address || isNaN(parsedCoordX) || isNaN(parsedCoordY) || 
+        isNaN(parsedPrice) || isNaN(parsedBeds) || isNaN(parsedBaths) || 
+        isNaN(parsedArea) || !category || !sell_type || !req.file || !agentId
       ) {
-        console.log('Request body:', req.body);  // Log the request body for debugging
-        console.log('File:', req.file);          // Log the file info for debugging
         return res.status(400).send("Missing or invalid required fields");
       }
   
@@ -73,11 +80,12 @@ app.post("/addProperty", upload.single('image'), async (req, res) => {
         price: parsedPrice,
         beds: parsedBeds,
         baths: parsedBaths,
-        area: parsedArea,  // Store the area as a number
+        area: parsedArea,
         category,
         status,
         sell_type,
         slug,
+        agent: agentId,
         image: `/Images/${req.file.filename}`
       });
   
@@ -88,42 +96,50 @@ app.post("/addProperty", upload.single('image'), async (req, res) => {
     }
   });
   
-  
-  
-  // Get all properties
+  // Updated get all properties route with agent information
   app.get("/getAllProperties", async (req, res) => {
     try {
-      // Fetch all properties where the status is not 'e shitur'
-      let properties = await Property.find({ status: { $ne: 'e shitur' } });
+        let properties = await Property.find({ status: 'ne shitje' })
+        .populate('agent', 'name surname phone_number rating'); // Populate agent details
       res.status(200).json(properties);
     } catch (err) {
       res.status(500).send("Gabim gjate marrjes se pronave!");
     }
   });
   
-  // Get a single property by ID
-  app.get("/getOneProperty/:id", async (req, res) => {
+  // Updated get one property route with agent information
+  app.get("/getOneProperty/:slug", async (req, res) => {
     try {
-      const propertyId = req.params.id;
-  
-      // Fetch the property by ID, ensuring the status is not 'e shitur'
-      let property = await Property.findOne({ _id: propertyId, status: { $ne: 'e shitur' } });
-  
+      const propertySlug = req.params.slug;
+      let property = await Property.findOne({ 
+        slug: propertySlug, 
+        status: { $ne: 'e shitur' } 
+      }).populate('agent'); // Populate all agent details
+    
       if (!property) {
         return res.status(404).send("Prona nuk gjendet ose eshte shitur!");
       }
-  
+    
       res.status(200).json(property);
     } catch (err) {
-      res.status(500).send("Error fetching property " + req.params.id);
+      res.status(500).send("Error fetching property with slug: " + req.params.slug);
     }
   });
   
-  // Update a property by ID
+  // Updated update property route
   app.patch("/updateProperty/:id", upload.single('image'), async (req, res) => {
     try {
       const propertyId = req.params.id;
       const propertyInfo = { ...req.body };
+  
+      if (propertyInfo.agentId) {
+        const agent = await Agent.findById(propertyInfo.agentId);
+        if (!agent) {
+          return res.status(404).send("Agent not found");
+        }
+        propertyInfo.agent = propertyInfo.agentId;
+        delete propertyInfo.agentId;
+      }
   
       if (propertyInfo.name) {
         propertyInfo.slug = await generateSlug(propertyInfo.name);
@@ -137,7 +153,7 @@ app.post("/addProperty", upload.single('image'), async (req, res) => {
         propertyId,
         { $set: propertyInfo },
         { new: true }
-      );
+      ).populate('agent');
   
       res.status(200).json(updatedProperty);
     } catch (err) {

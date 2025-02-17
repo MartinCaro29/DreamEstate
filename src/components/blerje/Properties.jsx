@@ -5,7 +5,7 @@ import axios from 'axios';
 import PropertyCard from './PropertyCard';
 import Header from '../landingpage/Header';
 
-const Properties = () => {
+const Properties = (props) => {
   const [properties, setProperties] = useState([]);
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [sortBy, setSortBy] = useState('');
@@ -28,8 +28,16 @@ const Properties = () => {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:5000/getAllProperties');
-      setProperties(response.data);
-      filterProperties(response.data);  // Filter immediately after fetching
+      const blerje = props.title === "Prona ne shitje"
+      // Filter properties that have sell_type 'blerje'
+
+      let blerjeProperties;
+      
+      if(blerje) blerjeProperties= response.data.filter(property => property.sell_type === 'blerje');
+      else blerjeProperties= response.data.filter(property => property.sell_type === 'qera');
+  
+      setProperties(blerjeProperties);
+      filterProperties(blerjeProperties);  // Apply search filtering after fetching
       setError(null);
     } catch (err) {
       setError('Error fetching properties');
@@ -102,7 +110,7 @@ const Properties = () => {
   return (
     <Container className="py-5">
       <div className="d-flex justify-content-between align-items-center px-3 mb-4 button-header">
-        <Header name={"Prona ne shitje"} />
+        <Header name={props.title} />
         <Dropdown>
           <Dropdown.Toggle variant="primary" id="dropdown-sort">
             {sortBy ? `Rendit sipas: ${sortOptions.find(opt => opt.value === sortBy)?.label}` : 'Rendit sipas'}

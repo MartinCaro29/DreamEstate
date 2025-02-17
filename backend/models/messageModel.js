@@ -1,25 +1,27 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const messageSchema = new Schema({
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  agent_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Agent',
-    required: true
-  },
+const messageSchema = new mongoose.Schema({
   property_id: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Property',
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
     required: true
   },
   message: {
     type: String,
-    required: true
+    required: false
   },
   created_at: {
     type: Date,
@@ -27,6 +29,6 @@ const messageSchema = new Schema({
   }
 });
 
-messageSchema.index({ user_id: 1, agent_id: 1 });
+messageSchema.index({ property_id: 1 });
 
 module.exports = mongoose.model('Message', messageSchema);

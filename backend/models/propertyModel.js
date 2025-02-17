@@ -6,10 +6,10 @@ const propertySchema = new Schema({
     type: String,
     required: true
   },
-  image:{
+  image: {
     type: String,
-    require:true,
-},
+    require: true,
+  },
   address: {
     type: String,
     required: true
@@ -22,14 +22,14 @@ const propertySchema = new Schema({
     type: Number,
     required: true
   },
-  price:{
+  price: {
     type: Number,
     require: true,
     min: 0,
-validate: {
-  validator: Number.isInteger,
-},
-},
+    validate: {
+      validator: Number.isInteger,
+    },
+  },
   beds: {
     type: Number,
     required: true
@@ -54,13 +54,18 @@ validate: {
   },
   status: {
     type: String,
-    enum: ['ne shitje', 'e shitur'],
-    default: 'ne shitje',
+    enum: ['ne verifikim', 'ne shitje', 'e shitur'],
+    default: 'ne verifikim',
   },
   sell_type: {
     type: String,
     enum: ['blerje', 'qera'],
-    required:true
+    required: true
+  },
+  agent: {
+    type: Schema.Types.ObjectId,
+    ref: 'Agent',
+    required: true
   },
   created_at: {
     type: Date,

@@ -1,0 +1,28 @@
+.agent-text, .property-name, .property-location{
+    text-align:left !important;
+    color: #00114B !important;
+}
+
+.property-category, .property-location, .icon-text{
+    font-size:1.4rem !important;
+}
+
+.form-title{
+    color: #00114B !important;
+    font-size:1.6rem
+}
+.price-tag{
+    font-size:3rem;
+   margin-top:10px
+}
+
+@media (max-width:500px){
+    .property-category{
+        font-size: 1rem !important;
+    }
+    .price-tag{
+        
+       margin-top:20px
+    }
+    
+}

@@ -42,9 +42,13 @@ app.use(cors(
 let userRouter = require("./routes/userRoute");
 let propertyRouter = require("./routes/propertyRoute");
 let favoritesRouter = require("./routes/favoritesRoute");
+let agentRouter = require("./routes/agentRoute");
+let messageRouter = require("./routes/messageRoute");
 app.use(userRouter);   
 app.use(propertyRouter); 
 app.use(favoritesRouter);
+app.use(agentRouter);
+app.use(messageRouter);
 app.use('/Images', express.static(path.join(__dirname, 'Images')));
 
 app.listen(5000, () => {

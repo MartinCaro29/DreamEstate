@@ -13,8 +13,8 @@
     font-size:0.94rem
 }
 
-.card-body-buy{
-    min-height:237.5px
+a.dropdown-item.active{
+    background-color: #face00;
 }
 
 .card{
@@ -22,7 +22,7 @@
     margin-right: auto;
 }
 
-.price{
+.price-tag{
     text-align: left;
 }
 .info-icons{
@@ -30,12 +30,22 @@
     flex-wrap: nowrap;
 }
 
+.price-and-info{
+    flex-direction: row;
+    justify-content: space-between;
+}
 .info-icons *{
     color: #00114B;
 }
 .text-secondary {
     --bs-text-opacity: 1 !important;
     color: #00114B  !important;
+}
+
+@media (max-width: 991px){
+    #property-map{
+        margin-top: 2rem
+    }
 }
 @media (max-width:767.5px){
     .button-header{
@@ -44,6 +54,12 @@
     }
 
     
+}
+
+@media (max-width:570px){
+    .price-and-info{
+        flex-direction: column-reverse;
+    }
 }
 
 @media (max-width:364.5px){
