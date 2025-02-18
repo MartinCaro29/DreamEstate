@@ -59,6 +59,10 @@ outline: none;
 transition: 0.5s ease
 }
 
+.dropdown-menu.show{
+  z-index: 100000;
+}
+
 .dropdown-item.active, .dropdown-item:active {
     color: #00114b !important;
     text-decoration: none;

@@ -11,6 +11,7 @@ import Register from './components/auth/Register';
 import Blerje from './components/blerje/Blerje';
 import PropertyDetail from './components/blerje/PropertyDetail';
 import MerrMeQera from './components/blerje/MerrMeQera';
+import FormAndMap from './components/mapsearch/FormAndMap';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       <Route path="/blerje" element={<Blerje/>} />
       <Route path="/qera" element={<MerrMeQera/>} />
       <Route path="/property/:slug" element={<PropertyDetail/>} />
+      <Route path="/kerkoneharte" element={<FormAndMap/>}/>
       </Routes>
      
       </UserContextProvider>

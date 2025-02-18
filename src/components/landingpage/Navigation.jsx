@@ -42,6 +42,7 @@ const Navigation = () => {
 
     // Navigate to the new URL with query parameters
     navigate(`/${category.toLowerCase().replace(/\s/g, '')}?q=${encodeURIComponent(query)}`);
+    window.location.reload();
   };
 
   return (

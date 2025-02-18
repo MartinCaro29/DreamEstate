@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import { Eye } from 'lucide-react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const PropertyListings = () => {
   const [properties, setProperties] = useState([]);
   const [randomListings, setRandomListings] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch properties when the component is mounted
   useEffect(() => {
@@ -43,35 +45,39 @@ const PropertyListings = () => {
       <div className="row g-4">
         {randomListings.map((listing) => (
           <div key={listing._id} className="col-md-4 col-sm-12">
-            <div className="card h-100">
-              <img
-                src={`http://localhost:5000${listing.image}`}  // Image should be fetched directly from the API
-                alt={listing.name}
-                className="card-img-top"
-                style={{ height: '200px', objectFit: 'cover' }}
-              />
-              <div className="card-body d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
-                <div>
-                  <small className="text-secondary mb-2" style={{ fontSize: '0.75rem' }}>
-                    {listing.category} {/* Use category or any additional detail */}
-                  </small>
-
-                  <h4 className="card-title mt-1 fs-6 mb-3" style={{ color: '#00114b' }}>
-                    {listing.name}
-                  </h4>
+          <div 
+            className="card h-100" 
+            style={{cursor: 'pointer'}} 
+            onClick={() => navigate(`/property/${listing?.slug}`)} // Corrected navigate call here
+          >
+            <img
+              src={`http://localhost:5000${listing.image}`}  // Image should be fetched directly from the API
+              alt={listing.name}
+              className="card-img-top"
+              style={{ height: '200px', objectFit: 'cover' }}
+            />
+            <div className="card-body d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
+              <div>
+                <small className="text-secondary mb-2" style={{ fontSize: '0.75rem' }}>
+                  {listing.category}
+                </small>
+                <h4 className="card-title mt-1 fs-6 mb-3" style={{ color: '#00114b' }}>
+                  {listing.name}
+                </h4>
+              </div>
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center text-secondary">
+                  <Eye size={30} className="me-1" style={{ color: '#00114b' }} />
+                  <small style={{ color: '#00114b' }}>{listing.views}</small>
                 </div>
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="d-flex align-items-center text-secondary">
-                    <Eye size={30} className="me-1" style={{ color: '#00114b' }} />
-                    <small style={{ color: '#00114b' }}>{listing.views}</small> {/* Static views data */}
-                  </div>
-                  <span className="h4 fw-bold" style={{ color: '#face00', margin: 0 }}>
-                    ${listing.price.toLocaleString()}
-                  </span>
-                </div>
+                <span className="h4 fw-bold" style={{ color: '#face00', margin: 0 }}>
+                  ${listing.price.toLocaleString()}
+                </span>
               </div>
             </div>
           </div>
+        </div>
+        
         ))}
       </div>
 
