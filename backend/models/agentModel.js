@@ -21,7 +21,7 @@ const agentSchema = new Schema({
     type: String,
     required: true
   },
-  experience: {
+  startYear: {
     type: Number,
     required: true,
     min: 0

@@ -12,6 +12,8 @@ import Blerje from './components/blerje/Blerje';
 import PropertyDetail from './components/blerje/PropertyDetail';
 import MerrMeQera from './components/blerje/MerrMeQera';
 import FormAndMap from './components/mapsearch/FormAndMap';
+import Shitje from './components/shitje/Shitje';
+import SellForm from './components/shitje/SellForm';
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
       <Route path="/qera" element={<MerrMeQera/>} />
       <Route path="/property/:slug" element={<PropertyDetail/>} />
       <Route path="/kerkoneharte" element={<FormAndMap/>}/>
+      <Route path="/shitje" element={<Shitje/>}/>
+      <Route path="/shisnipronen" element={<SellForm/>}/>
       </Routes>
      
       </UserContextProvider>

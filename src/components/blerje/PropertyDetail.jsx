@@ -309,7 +309,7 @@ const PropertyDetail = () => {
                                         <h2 className="mb-1 agent-text">{property.agent?.name} {property.agent?.surname}</h2>
                                         <p className="agent-text text-secondary mb-2">{property.agent?.email}</p>
                                         <p className="mb-2 agent-text">
-                                            Eksperiencë pune: {property.agent?.experience} vite
+                                            Eksperiencë pune: {new Date().getFullYear() - property.agent?.startYear} vite
                                         </p>
                                         <h4 className="mb-1 agent-text">
                                             Telefon: {property.agent?.phone_number}

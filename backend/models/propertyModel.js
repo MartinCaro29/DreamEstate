@@ -65,7 +65,6 @@ const propertySchema = new Schema({
   agent: {
     type: Schema.Types.ObjectId,
     ref: 'Agent',
-    required: true
   },
   created_at: {
     type: Date,
