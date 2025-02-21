@@ -71,7 +71,7 @@ const PropertyListings = () => {
                   <small style={{ color: '#00114b' }}>{listing.views}</small>
                 </div>
                 <span className="h4 fw-bold" style={{ color: '#face00', margin: 0 }}>
-                  ${listing.price.toLocaleString()}
+                  ${listing.price.toLocaleString()}{listing.sell_type==="qera" ? " / muaj" : ""}
                 </span>
               </div>
             </div>

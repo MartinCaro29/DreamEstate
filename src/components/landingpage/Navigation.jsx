@@ -46,7 +46,7 @@ const Navigation = () => {
   };
 
   return (
-    <>
+    <div>
       <div className="bg-navy text-white py-3">
         <Container className="d-flex top-nav-container align-items-center">
           <a href="/" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -166,7 +166,7 @@ const Navigation = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-    </>
+    </div>
   );
 };
 

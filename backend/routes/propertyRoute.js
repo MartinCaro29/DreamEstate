@@ -57,15 +57,15 @@ app.post("/addProperty", upload.single('image'), async (req, res) => {
       const parsedArea = parseInt(area);
   
       // Check if agent exists
-      const agent = await Agent.findById(agentId);
-      if (!agent) {
-        return res.status(404).send("Agent not found");
+     
+      if (status!=="ne verifikim") {
+        return res.status(404).send("Gabim ne shtimin e prones");
       }
   
       if (
         !name || !address || isNaN(parsedCoordX) || isNaN(parsedCoordY) || 
         isNaN(parsedPrice) || isNaN(parsedBeds) || isNaN(parsedBaths) || 
-        isNaN(parsedArea) || !category || !sell_type || !req.file || !agentId
+        isNaN(parsedArea) || !category || !sell_type || !req.file 
       ) {
         return res.status(400).send("Missing or invalid required fields");
       }

@@ -145,6 +145,7 @@ const Properties = (props) => {
                 slug={property.slug}
                 area={property.area}
                 propertyId={property._id}
+                sell_type={property.sell_type}
               />
             </div>
           ))}

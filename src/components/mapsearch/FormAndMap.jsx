@@ -9,6 +9,11 @@ import FooterNav from '../landingpage/FooterNav';
 import MapCover from './MapCover';
 
 const FormAndMap = () => {
+
+    useEffect(() => {
+        window.scrollTo(0, 0);  
+      }, [])
+      
     const [properties, setProperties] = useState([]);
     const [filteredProperties, setFilteredProperties] = useState([]);
     const [loading, setLoading] = useState(true);

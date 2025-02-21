@@ -14,7 +14,8 @@ const PropertyCard = ({
   baths,
   slug,
   area,
-  propertyId
+  propertyId,
+  sell_type
 }) => {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -126,7 +127,7 @@ const PropertyCard = ({
         </div>
         <div>
           <div className="d-flex justify-content-between card-bottom mb-1">
-            <span className="h4 mb-0 text-warning fw-bold price">€{price?.toLocaleString()}</span>
+            <span className="h4 mb-0 text-warning fw-bold price">€{price?.toLocaleString()}{sell_type==="qera" ? " / muaj" : ""}</span>
             <div className="d-flex align-items-center gap-2 info-icons">
               <div className="d-flex align-items-center gap-1">
                 <svg className="text-secondary" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">

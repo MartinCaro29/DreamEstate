@@ -46,7 +46,7 @@ const navigate = useNavigate();
                   <Button 
                     variant="warning" 
                     className="w-100 py-2 text-dark fw-semibold"
-                    onClick={() => {navigate(product.link)}}
+                    href= {product.link}
                   >
                     {product.buttonText}
                   </Button>

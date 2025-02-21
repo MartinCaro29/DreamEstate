@@ -263,7 +263,7 @@ const PropertyDetail = () => {
 
                                 <h2 className="mb-3 property-name">{property.name}</h2>
                                 <div className="d-flex price-and-info mb-4">
-                                    <h3 className="text-warning price-tag">€{property.price?.toLocaleString()}</h3>
+                                    <h3 className="text-warning price-tag">€{property.price?.toLocaleString()}{property.sell_type==="qera" ? " / muaj" : ""} </h3>
                                     <div className="d-flex align-items-center gap-3 info-icons">
                                         <div className="d-flex align-items-center gap-1">
                                             <svg className="text-secondary" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -4,6 +4,7 @@ import Img1 from "../../images/dreamestateforsale.jpg";
 import '../blerje/BlerjeCover.css';
 
 function MapCover() {
+
     const [searchValue, setSearchValue] = useState('');
     const [selectedNavPill, setSelectedNavPill] = useState('shitje');
     const [isMobile, setIsMobile] = useState(false);

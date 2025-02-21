@@ -7,6 +7,30 @@
     font-size:1rem !important
 }
 
+.custom-select-invalid {
+    border-color: red !important;
+    background-color: #fff3f3 !important;
+}
+
+.custom-select-invalid option {
+    background-color: white !important;
+}
+
+
+
+.form-background-sell, .form-background-estimate{
+    background-repeat: no-repeat;
+    background-size: cover;
+    object-fit: cover;
+}
+
+.form-background-sell{
+background-image: url('../../images/dreamestateformbackground1.jpg');
+}
+.form-background-estimate{
+background-image: url('../../images/dreamestateformbackground2.jpg');
+}
+
 @media (max-width: 991.5px){
     .shitje-title{
        font-size: 1.2rem !important 

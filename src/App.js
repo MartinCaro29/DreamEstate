@@ -14,6 +14,7 @@ import MerrMeQera from './components/blerje/MerrMeQera';
 import FormAndMap from './components/mapsearch/FormAndMap';
 import Shitje from './components/shitje/Shitje';
 import SellForm from './components/shitje/SellForm';
+import EstimatePrice from './components/shitje/EstimatePrice';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
       <Route path="/kerkoneharte" element={<FormAndMap/>}/>
       <Route path="/shitje" element={<Shitje/>}/>
       <Route path="/shisnipronen" element={<SellForm/>}/>
+      <Route path="/vleresonipronen" element={<EstimatePrice/>}/>
       </Routes>
      
       </UserContextProvider>
