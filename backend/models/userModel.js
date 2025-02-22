@@ -33,6 +33,10 @@ const userSchema = new Schema({
     type: String,
     length: 64
   },
+  remember_me_token_created_at: {
+    type: Date, // This field stores when the token was created
+    default: Date.now
+  },
   created_at: {
     type: Date,
     default: Date.now

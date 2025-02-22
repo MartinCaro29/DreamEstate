@@ -105,23 +105,31 @@ const Register = () => {
     };
 
 
-
     const handleVerifyEmail = async (e) => {
         e.preventDefault();
         setIsVerifying(true);
+        
         try {
             await axios.post('http://localhost:5000/verify-email', {
                 email: newUser.email,
                 token: verificationCode
             });
-            navigate('/login');
+    
+            // Show success message for 2 seconds
+            setAlert('success');
+            setError('Email-i u verifikua me sukses! Po ridrejtoheni në faqen e hyrjes...');
+    
+            setTimeout(() => {
+                navigate('/login'); // Redirect to the login page
+            }, 2000);
+    
         } catch (err) {
             if (err.response?.status === 400) {
                 const errorMsg =
                     err.response.data === 'Token not found or expired.' ? 'Kodi i verifikimit nuk u gjet ose ka skaduar.' :
-                        err.response.data === 'Token has expired.' ? 'Kodi i verifikimit ka skaduar.' :
-                            err.response.data === 'Invalid token.' ? 'Kodi i verifikimit është i pavlefshëm.' :
-                                'Kodi i verifikimit është i pasaktë ose ka skaduar.';
+                    err.response.data === 'Token has expired.' ? 'Kodi i verifikimit ka skaduar.' :
+                    err.response.data === 'Invalid token.' ? 'Kodi i verifikimit është i pavlefshëm.' :
+                    'Kodi i verifikimit është i pasaktë ose ka skaduar.';
                 handleError(errorMsg);
             } else {
                 handleError('Gabim gjatë verifikimit. Ju lutemi provoni përsëri.');
@@ -130,7 +138,7 @@ const Register = () => {
             setIsVerifying(false); // Reset verifying state
         }
     };
-
+    
 
 
 
@@ -217,6 +225,12 @@ const Register = () => {
                                         Jeni te regjistruar?{' '}
                                         <a href="/login" className="text-decoration-none auth-link">
                                             Autentikohu
+                                        </a>
+                                    </p>
+                                    <p className="text-center mt-3">
+                                        Harruat fjalekalimin?{' '}
+                                        <a href="/ndryshofjalekalimin" className="text-decoration-none auth-link">
+                                            Vazhdoni ketu
                                         </a>
                                     </p>
                                 </Form>

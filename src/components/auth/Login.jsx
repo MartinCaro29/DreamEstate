@@ -18,6 +18,9 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [countdown, setCountdown] = useState(0);
     const [resendSuccess, setResendSuccess] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);  // New state for "Remember Me" checkbox
+
+    
 
     useEffect(() => {
         let timer;
@@ -38,7 +41,7 @@ const Login = () => {
         setAlert(alertType);
         setTimeout(() => setError(''), 3000);
     };
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!userLog.email || !userLog.password) {
@@ -47,9 +50,7 @@ const Login = () => {
         }
     
         try {
-            const response = await axios.post('http://localhost:5000/login/', userLog, {
-                withCredentials: true,
-            });
+            const response = await axios.post('http://localhost:5000/login/', { ...userLog, rememberMe }, { withCredentials: true });
     
             if (response.data.needsVerification) {
                 setStep('verify');
@@ -57,52 +58,58 @@ const Login = () => {
                 return;
             }
     
-            // Save only the user's id to localStorage
-            localStorage.setItem('userId', response.data.id); // Save the user's ID instead of token
-    
-            // Set the user info in context
+            localStorage.setItem('userId', response.data.id);
             setUserInfo(response.data);
             navigate('/');
+            window.location.reload();
         } catch (err) {
             console.error('Login error:', err);
             setAlert('danger');
-            handleError('Email-i ose fjalëkalimi nuk janë të sakta. Ju lutem kontrolloni dhe provoni përsëri.');
+            
+            // Check if it's a block error (status 429)
+            if (err.response?.status === 429) {
+                handleError(err.response.data.error);
+            } else {
+                // For other errors, show the default message
+                handleError('Email-i ose fjalëkalimi nuk janë të sakta. Ju lutem kontrolloni dhe provoni përsëri.');
+            }
         }
     };
-    
 
-
-    const [isVerifying, setIsVerifying] = useState(false); // New state for button disable
+    const [isVerifying, setIsVerifying] = useState(false);
 
     const handleVerifyEmail = async (e) => {
         e.preventDefault();
-        setIsVerifying(true); // Disable the button and show loading state
+        setIsVerifying(true);
+
         try {
             const response = await axios.post('http://localhost:5000/verify-email', {
                 email: userLog.email,
                 token: verificationCode,
             });
 
-            // Assuming the server responds with the user data after successful verification
-            setUserInfo(response.data);
-            navigate('/'); // Redirect to the home page
+            setAlert('success');
+            setError('Email-i u verifikua me sukses! Po ridrejtoheni...');
+
+            setTimeout(() => {
+                setUserInfo(response.data);
+                navigate('/');
+            }, 2000);
+
         } catch (err) {
-            setIsVerifying(false); // Re-enable the button on failure
-            const errorMsg =
-                err.response?.data === 'Token not found or expired.' ? 'Kodi i verifikimit nuk u gjet ose ka skaduar.' :
-                    err.response?.data === 'Token has expired.' ? 'Kodi i verifikimit ka skaduar.' :
-                        err.response?.data === 'Invalid token.' ? 'Kodi i verifikimit është i pavlefshëm.' :
-                            'Gabim gjatë verifikimit. Ju lutemi provoni përsëri.';
+            setIsVerifying(false);
+            const errorMsg = err.response?.data === 'Token not found or expired.' ? 'Kodi i verifikimit nuk u gjet ose ka skaduar.' :
+                err.response?.data === 'Token has expired.' ? 'Kodi i verifikimit ka skaduar.' :
+                err.response?.data === 'Invalid token.' ? 'Kodi i verifikimit është i pavlefshëm.' :
+                'Gabim gjatë verifikimit. Ju lutemi provoni përsëri.';
+
             handleError(errorMsg);
         }
     };
 
-
     const handleResendCode = async () => {
         try {
-            await axios.post('http://localhost:5000/resend-verification', {
-                email: userLog.email,
-            });
+            await axios.post('http://localhost:5000/resend-verification', { email: userLog.email });
             setResendSuccess('Kodi i verifikimit u ridërgua me sukses!');
             setCountdown(10);
             setTimeout(() => setResendSuccess(''), 3000);
@@ -149,13 +156,23 @@ const Login = () => {
                                             className="shadow-sm"
                                         />
                                     </Form.Group>
-                                    <Form.Group className="mb-4">
+                                    <Form.Group className="mb-3">
                                         <Form.Check
                                             type="checkbox"
                                             id="show-password"
                                             label="Shfaq fjalëkalimin"
                                             onChange={() => setShowPassword(!showPassword)}
                                             checked={showPassword}
+                                        />
+                                    </Form.Group>
+                                    {/* Remember Me Checkbox */}
+                                    <Form.Group className="mb-3">
+                                        <Form.Check
+                                            type="checkbox"
+                                            id="remember-me"
+                                            label="Më Mbaj Mend"
+                                            checked={rememberMe}
+                                            onChange={() => setRememberMe(!rememberMe)}
                                         />
                                     </Form.Group>
                                     <div className="d-grid gap-2">
@@ -167,6 +184,12 @@ const Login = () => {
                                         Nuk keni një llogari?{' '}
                                         <a href="/register" className="text-decoration-none auth-link">
                                             Regjistrohu
+                                        </a>
+                                    </p>
+                                    <p className="text-center mt-3">
+                                        Harruat fjalekalimin?{' '}
+                                        <a href="/ndryshofjalekalimin" className="text-decoration-none auth-link">
+                                            Vazhdoni ketu
                                         </a>
                                     </p>
                                 </Form>
@@ -199,7 +222,6 @@ const Login = () => {
                                         </Button>
                                     </div>
                                 </Form>
-
                             )}
                             {error && <Alert variant={alert} className="mt-3">{error}</Alert>}
                             {resendSuccess && <Alert variant="success" className="mt-3">{resendSuccess}</Alert>}

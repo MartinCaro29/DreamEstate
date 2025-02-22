@@ -10,8 +10,8 @@ const failedLoginAttemptsSchema = new Schema({
   },
   failed_attempts: {
     type: Number,
-    default: 0,
-    min: 0
+    default: 1,
+    min: 1
   },
   last_failed_attempt: {
     type: Date,

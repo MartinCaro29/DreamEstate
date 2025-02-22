@@ -11,6 +11,7 @@ const Navigation = () => {
   const { userInfo, setUserInfo } = useContext(UserContext);
   const navigate = useNavigate();
 
+  const userId = localStorage.getItem('userId')
   // Keep "Shitje" in this array for the first dropdown
   const allCategories = [
     'Blerje',
@@ -100,9 +101,8 @@ const Navigation = () => {
                 })}
               </NavDropdown>
               <Nav.Link href="/kushjemi">Kush jemi</Nav.Link>
-              <Nav.Link href="/blog">Blogu</Nav.Link>
               <Nav.Link href="/kontakt">Kontakt</Nav.Link>
-              {Object.keys(userInfo).length === 0 ? (
+              {!userId ? (
                 <Nav.Link href="/login">Autentikimi</Nav.Link>
               ) : (
                 <>

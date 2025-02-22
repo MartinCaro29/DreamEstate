@@ -2,9 +2,12 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer');
 const userModel = require('../models/userModel');
+
+const FailedLoginAttempts = require('../models/failedLoginAttemptsModel');
 
 const secret = 'asdfe45we45w345wegw345werjktjwertkjfdgfgfsgf';
 const salt = bcrypt.genSaltSync(10);
@@ -71,7 +74,8 @@ router.post('/register', async (req, res) => {
         username: userInfo.username,
         email: userInfo.email,
         password: bcrypt.hashSync(userInfo.password, salt),
-        email_verified: 0
+        email_verified: 0,
+        remember_me_token: null
       });
   
       await newUser.save();
@@ -143,74 +147,166 @@ router.post('/verify-email', async (req, res) => {
   res.status(200).send('Email verified successfully.');
 });
 
-// Login Route
 
 router.post('/login', async (req, res) => {
-    const userData = req.body;
-    try {
-      const findUser = await userModel.findOne({ email: userData.email }).exec();
-      console.log('Found user:', findUser);
+  const { email, password, rememberMe } = req.body;
+
+  // Only proceed if email is provided
+  if (!email) {
+    return res.status(400).send('Email-i është i detyrueshëm');
+  }
+
+  try {
+    // Check if this email is currently blocked
+    const failedAttempts = await FailedLoginAttempts.findById(email.toLowerCase());
+    
+    if (failedAttempts && failedAttempts.failed_attempts >= 7) {
+      const blockedTime = Date.now() - failedAttempts.last_failed_attempt.getTime();
+      const thirtyMinutes = 30 * 60 * 1000;
       
-      if (findUser) {
-        const passOk = bcrypt.compareSync(userData.password, findUser.password);
-        console.log('Password check:', passOk);
-        console.log('Email verified status:', findUser.email_verified);
-        
-        if (passOk) {
-          // Check email verification before allowing login
-          if (findUser.email_verified === 0) {
-            console.log('User not verified, sending to verification step');
-            // Generate a new verification token
-            const token = Math.floor(100000 + Math.random() * 900000).toString();
-            verificationTokens[findUser.email] = {
-              token,
-              expires: Date.now() + 10 * 60 * 1000
-            };
-  
-            // Send verification email
-            try {
-              const mailOptions = {
-                from: 'electroman784@gmail.com',
-                to: findUser.email,
-                subject: 'Kodi i ri i Verifikimit',
-                text: `Ky është kodi juaj i ri i verifikimit: ${token}. Kodi do të skadojë pas 10 minutash.`,
-              };
-              await transporter.sendMail(mailOptions);
-            } catch (emailError) {
-              console.error('Error sending verification email:', emailError);
-            }
-  
-            return res.status(200).json({
-              needsVerification: true,
-              email: findUser.email,
-              email_verified: 0
-            });
-          }
-  
-          jwt.sign({ email: findUser.email, id: findUser._id }, secret, {}, (err, token) => {
-            if (err) {
-              console.error('Error generating token:', err);
-              res.status(500).send("Something is wrong");
-            } else {
-              console.log('Login successful, sending response');
-              res.cookie('token', token, { httpOnly: true }).json({
-                id: findUser._id,
-                email: findUser.email,
-                email_verified: findUser.email_verified
-              });
-            }
-          });
-        } else {
-          res.status(400).send('Invalid credentials');
-        }
+      if (blockedTime < thirtyMinutes) {
+        return res.status(429).json({
+          error: 'Llogaria juaj është bllokuar përkohësisht. Ju lutemi provoni më vonë.'
+        });
       } else {
-        res.status(404).send('User not found');
+        // If 30 minutes have passed, remove the entry
+        await FailedLoginAttempts.findByIdAndDelete(email.toLowerCase());
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      res.status(500).send("Something is wrong: " + err);
     }
-  });
+
+    const findUser = await userModel.findOne({ email }).exec();
+    console.log('Found user:', findUser);
+
+    // Handle failed login attempt
+    const handleFailedAttempt = async () => {
+      try {
+        const result = await FailedLoginAttempts.findByIdAndUpdate(
+          email.toLowerCase(),
+          {
+            $inc: { failed_attempts: 1 },
+            last_failed_attempt: Date.now()
+          },
+          { upsert: true, new: true }
+        );
+
+        // If this update pushed us over the limit, return the blocking message
+        if (result.failed_attempts >= 7) {
+          return res.status(429).json({
+            error: 'Llogarija juaj është bllokuar përkohësisht. Ju lutemi provoni më vonë.'
+          });
+        }
+
+        return null; // Indicate we should continue with normal error messages
+      } catch (error) {
+        console.error('Error updating failed attempts:', error);
+        throw error;
+      }
+    };
+
+    // User not found - count as failed attempt
+    if (!findUser) {
+      const blockingResult = await handleFailedAttempt();
+      if (blockingResult) return blockingResult; // If blocked, return that response
+      
+      return res.status(404).json({
+        error: 'Përdoruesi nuk u gjet'
+      });
+    }
+
+    // Invalid password - count as failed attempt
+    const passOk = bcrypt.compareSync(password, findUser.password);
+    if (!passOk) {
+      const blockingResult = await handleFailedAttempt();
+      if (blockingResult) return blockingResult; // If blocked, return that response
+      
+      return res.status(400).json({
+        error: 'Kredencialet e pavlefshme'
+      });
+    }
+
+    // If login is successful, remove any failed attempts record
+    await FailedLoginAttempts.findByIdAndDelete(email.toLowerCase());
+
+    if (findUser.email_verified === 0) {
+      console.log('User not verified, sending to verification step');
+
+      const token = Math.floor(100000 + Math.random() * 900000).toString();
+      verificationTokens[findUser.email] = { token, expires: Date.now() + 10 * 60 * 1000 };
+
+      try {
+        const mailOptions = {
+          from: 'electroman784@gmail.com',
+          to: findUser.email,
+          subject: 'Kodi i ri i Verifikimit',
+          text: `Ky është kodi juaj i ri i verifikimit: ${token}. Kodi do të skadojë pas 10 minutash.`,
+        };
+        await transporter.sendMail(mailOptions);
+      } catch (emailError) {
+        console.error('Error sending verification email:', emailError);
+      }
+
+      return res.status(200).json({ needsVerification: true, email: findUser.email });
+    }
+
+    // Handle remember me token
+    if (rememberMe === true) {
+      if (findUser.remember_me_token) {
+        findUser.remember_me_token_created_at = Date.now();
+        await findUser.save();
+      } else {
+        findUser.remember_me_token = crypto.randomBytes(32).toString('hex');
+        findUser.remember_me_token_created_at = Date.now();
+        await findUser.save();
+      }
+    }
+
+    jwt.sign({ email: findUser.email, id: findUser._id }, secret, {}, (err, token) => {
+      if (err) return res.status(500).send("Diçka shkoi keq me gjenerimin e tokenit");
+
+      console.log('Login successful, sending response with rememberMeToken:', findUser.remember_me_token);
+
+      res.cookie('token', token, { httpOnly: true }).json({
+        id: findUser._id,
+        email: findUser.email,
+        email_verified: findUser.email_verified,
+        rememberMeToken: findUser.remember_me_token
+      });
+    });
+
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).send("Diçka shkoi keq: " + err);
+  }
+});
+
+
+router.get('/get-remember-token/:userId', async (req, res) => {
+  try {
+      const { userId } = req.params;
+
+      const user = await userModel.findById(userId);
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      const tokenAge = Date.now() - new Date(user.remember_me_token_created_at).getTime();
+      const TWO_DAYS_IN_MS = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+
+      if (tokenAge > TWO_DAYS_IN_MS) {
+          // Token expired, nullify it
+          user.remember_me_token = null;
+          user.remember_me_token_created_at = null;
+          await user.save();
+          return res.status(200).json({ rememberMeToken: null, message: 'Token expired' });
+      }
+
+      res.json({ rememberMeToken: user.remember_me_token });
+  } catch (error) {
+      console.error("Error fetching remember_me_token:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 // Logout Route
 router.post('/logout', (req, res) => {
@@ -253,5 +349,121 @@ router.post('/resend-verification', async (req, res) => {
       res.status(500).send('Diçka nuk shkon. Ju lutemi provoni përsëri më vonë.');
     }
   });
+
+  router.post('/request-password-reset', async (req, res) => {
+    try {
+        let userEmail;
+        
+        // Check if user is authenticated
+        const token = req.cookies.token;
+        if (token) {
+            // Get user email from token
+            const decoded = jwt.verify(token, secret);
+            userEmail = decoded.email;
+        } else {
+            // Get email from request body
+            userEmail = req.body.email;
+            
+            // Verify email exists
+            const user = await userModel.findOne({ email: userEmail });
+            if (!user) {
+                return res.status(404).send('Ky email nuk ekziston.');
+            }
+        }
+
+        // Generate verification token
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+        verificationTokens[userEmail] = {
+            token: verificationToken,
+            expires: Date.now() + 10 * 60 * 1000 // 10 minutes expiration
+        };
+
+        // Send verification email
+        const mailOptions = {
+            from: 'electroman784@gmail.com',
+            to: userEmail,
+            subject: 'Rivendosja e Fjalëkalimit',
+            text: `Ky është kodi juaj i verifikimit për rivendosjen e fjalëkalimit: ${verificationToken}. Kodi do të skadojë pas 10 minutash.`
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.status(200).send('Kodi i verifikimit u dërgua me sukses.');
+    } catch (err) {
+        console.error('Gabim gjatë kërkesës për rivendosjen e fjalëkalimit:', err);
+        res.status(500).send('Diçka nuk shkon. Ju lutemi provoni përsëri më vonë.');
+    }
+});
+
+// Verify Reset Code Route
+router.post('/verify-reset-code', async (req, res) => {
+    const { email, token } = req.body;
+    let userEmail = email;
+
+    // If user is authenticated, get email from token
+    const cookieToken = req.cookies.token;
+    if (cookieToken) {
+        const decoded = jwt.verify(cookieToken, secret);
+        userEmail = decoded.email;
+    }
+
+    if (!verificationTokens[userEmail]) {
+        return res.status(400).send('Token not found or expired.');
+    }
+
+    const { token: storedToken, expires } = verificationTokens[userEmail];
+
+    if (Date.now() > expires) {
+        delete verificationTokens[userEmail];
+        return res.status(400).send('Token has expired.');
+    }
+
+    if (storedToken !== token) {
+        return res.status(400).send('Invalid token.');
+    }
+
+    res.status(200).send('Code verified successfully.');
+});
+
+// Reset Password Route
+router.post('/reset-password', async (req, res) => {
+  try {
+      let userEmail = req.body.email;
+      const newPassword = req.body.password;
+
+      if (!newPassword) {
+          return res.status(400).send('Ju lutemi jepni një fjalëkalim të ri.');
+      }
+
+      // If user is authenticated, get email from token
+      const token = req.cookies.token;
+      if (token) {
+          const decoded = jwt.verify(token, secret);
+          userEmail = decoded.email;
+      }
+
+      // Check if the user exists
+      const user = await userModel.findOne({ email: userEmail });
+      if (!user) {
+          return res.status(404).send('Përdoruesi nuk u gjet.');
+      }
+
+      // Hash the new password
+      const hashedPassword = bcrypt.hashSync(newPassword, salt);
+
+      // Update the user's password
+      await userModel.findOneAndUpdate(
+          { email: userEmail },
+          { password: hashedPassword }
+      );
+
+      // Remove the verification token (if any)
+      delete verificationTokens[userEmail];
+
+      res.status(200).send('Fjalëkalimi u ndryshua me sukses.');
+  } catch (err) {
+      console.error('Gabim gjatë ndryshimit të fjalëkalimit:', err);
+      res.status(500).send('Diçka nuk shkon. Ju lutemi provoni përsëri më vonë.');
+  }
+});
 
 module.exports = router;

@@ -17,7 +17,7 @@ code {
     monospace;
 }
 
-.btn-primary {
+.btn-primary, .btn-warning {
   --bs-btn-color: #00114b !important;
   --bs-btn-bg: #FACE00 !important;
   --bs-btn-border-color: #FACE00 !important;

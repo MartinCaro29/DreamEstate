@@ -8,7 +8,7 @@ const FooterNav = () => {
   // This is just an example - replace with your actual auth state management
 
   const { userInfo, setUserInfo } = useContext(UserContext);
-  const isAuthenticated = Object.keys(userInfo).length !== 0; // Replace this with your actual auth check
+  const isAuthenticated = localStorage.getItem('userId');; // Replace this with your actual auth check
 
   const propertyTypes = [
     { name: 'Blerje', path: '/blerje' },
@@ -21,7 +21,6 @@ const FooterNav = () => {
   const getAdditionalLinks = () => {
     const commonLinks = [
       { name: 'Kush jemi', path: '/kushjemi' },
-      { name: 'Blogu', path: '/blog' },
       { name: 'Kontakt', path: '/kontakt' },
     ];
 
