@@ -8,6 +8,9 @@ import './Auth.css';
 const Register = () => {
     const navigate = useNavigate();
 
+    useEffect(() => {
+        window.scrollTo(0, 0);  
+      }, [])
     const [step, setStep] = useState('register');
     const [newUser, setNewUser] = useState({
         username: '',

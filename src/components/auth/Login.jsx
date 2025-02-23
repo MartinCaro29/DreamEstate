@@ -20,6 +20,9 @@ const Login = () => {
     const [resendSuccess, setResendSuccess] = useState('');
     const [rememberMe, setRememberMe] = useState(false);  // New state for "Remember Me" checkbox
 
+    useEffect(() => {
+        window.scrollTo(0, 0);  
+      }, [])
     
 
     useEffect(() => {
@@ -41,7 +44,7 @@ const Login = () => {
         setAlert(alertType);
         setTimeout(() => setError(''), 3000);
     };
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!userLog.email || !userLog.password) {

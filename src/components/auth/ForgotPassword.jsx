@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Form, Button, Alert, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { UserContext } from './UserContext';
+import { useNavigate} from 'react-router-dom';
 import AuthLogo from '../../images/dreamestatelogoauth.png';
 import './Auth.css';
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
-    const { userInfo } = useContext(UserContext);
     
-    const [step, setStep] = useState('email');
+    useEffect(() => {
+        window.scrollTo(0, 0);  
+      }, [])
+    
+    const [step, setStep] = useState('initial'); // Changed initial state
     const [email, setEmail] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     const [passwords, setPasswords] = useState({
@@ -23,13 +25,47 @@ const ForgotPassword = () => {
     const [countdown, setCountdown] = useState(0);
     const [resendSuccess, setResendSuccess] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        // If user is authenticated, skip email step and request verification code
-        if (userInfo?.id) {
-            handleAuthenticatedReset();
+        const checkAuthentication = async () => {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                try {
+                    // Get user's email from the server using userId
+                    const response = await axios.get(`http://localhost:5000/messages/user/${userId}`);
+                    setEmail(response.data.email);
+                    setIsAuthenticated(true);
+                    console.log(isAuthenticated)
+                    // Directly start the reset process for authenticated users
+                    handleAuthenticatedReset(response.data.email);
+                } catch (err) {
+                    console.error('Error fetching user data:', err);
+                    setStep('email'); // Fallback to email step if there's an error
+                }
+            } else {
+                setStep('email');
+            }
+        };
+
+        checkAuthentication();
+    }, []);
+
+    const handleAuthenticatedReset = async (userEmail) => {
+        try {
+            await axios.post('http://localhost:5000/request-password-reset', {
+                email: userEmail
+            }, {
+                withCredentials: true
+            });
+            setStep('verify');
+            setCountdown(10);
+        } catch (err) {
+            handleError('Gabim gjatë dërgimit të kodit. Ju lutemi provoni përsëri.');
+            // If authenticated request fails, stay on verify step but show error
+            setStep('verify');
         }
-    }, [userInfo]);
+    };
 
     useEffect(() => {
         let timer;
@@ -41,17 +77,7 @@ const ForgotPassword = () => {
         return () => clearInterval(timer);
     }, [countdown]);
 
-    const handleAuthenticatedReset = async () => {
-        try {
-            await axios.post('http://localhost:5000/request-password-reset', {}, {
-                withCredentials: true
-            });
-            setStep('verify');
-            setCountdown(10);
-        } catch (err) {
-            handleError('Gabim gjatë dërgimit të kodit. Ju lutemi provoni përsëri.');
-        }
-    };
+    
 
     const validatePassword = (password) => {
         const hasUpperCase = /[A-Z]/.test(password);
@@ -163,9 +189,15 @@ const ForgotPassword = () => {
     };
 
     const renderStep = () => {
+        // Show loading state while checking authentication
+        if (step === 'initial') {
+            return <div className="text-center">Duke kontrolluar...</div>;
+        }
+
         switch (step) {
             case 'email':
-                return (
+                // Only show email step for non-authenticated users
+                return !isAuthenticated ? (
                     <Form onSubmit={handleEmailSubmit}>
                         <Form.Group className="mb-3 form-element">
                             <Form.Label>Email</Form.Label>
@@ -183,7 +215,7 @@ const ForgotPassword = () => {
                             </Button>
                         </div>
                     </Form>
-                );
+                ) : null;
             case 'verify':
                 return (
                     <Form onSubmit={handleVerifyCode}>
@@ -273,14 +305,17 @@ const ForgotPassword = () => {
                 <Col md={6} className="h-100 right-side right-side-login">
                     <div className="h-100 d-flex align-items-center right-side-stuff justify-content-center p-4">
                         <div className="w-100" style={{ maxWidth: '400px' }}>
-                            <div className="w-100">
-                                <a href="/">
-                                    <img src={AuthLogo} className="logo-auth-img" style={{ marginBottom: '3rem' }} alt="Auth Logo" />
-                                </a>
-                            </div>
+                            
+                                <div className="w-100">
+                                    <a href="/">
+                                        <img src={AuthLogo} className="logo-auth-img" style={{ marginBottom: '3rem' }} alt="Auth Logo" />
+                                    </a>
+                                </div>
+                           
                             <h1 className="text-center mb-4">
                                 {step === 'email' ? 'Rivendos Fjalëkalimin' :
                                  step === 'verify' ? 'Verifiko Email-in' :
+                                 step === 'initial' ? 'Duke kontrolluar...' :
                                  'Fjalëkalimi i Ri'}
                             </h1>
                             
@@ -298,12 +333,23 @@ const ForgotPassword = () => {
                                 </Alert>
                             )}
 
-                            <p className="text-center mt-3">
-                                Ju kujtua fjalëkalimi?{' '}
-                                <a href="/login" className="text-decoration-none auth-link">
-                                    Autentikohu
-                                </a>
-                            </p>
+                            {!isAuthenticated && (
+                                <p className="text-center mt-3">
+                                    Ju kujtua fjalëkalimi?{' '}
+                                    <a href="/login" className="text-decoration-none auth-link">
+                                        Autentikohu
+                                    </a>
+                                </p>
+                            )}
+
+                            {isAuthenticated && (
+                                <p className="text-center mt-3">
+                                    Ju kujtua fjalëkalimi?{' '}
+                                    <a href="/llogaria" className="text-decoration-none auth-link">
+                                        Kthehu
+                                    </a>
+                                </p>
+                            )}
                         </div>
                     </div>
                 </Col>

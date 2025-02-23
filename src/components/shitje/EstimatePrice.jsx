@@ -179,7 +179,7 @@ const EstimatePrice = () => {
     
         // Apply proper rounding
         if (isRental) {
-            estimate = Math.ceil(estimate / 100) * 100;
+            estimate = Math.ceil(estimate / 10) * 10;
         } else {
             estimate = Math.ceil(estimate / 1000) * 1000;
         }

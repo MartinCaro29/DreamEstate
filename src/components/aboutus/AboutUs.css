@@ -1,0 +1,19 @@
+.about-us p {
+    text-align: left;
+    font-size: 1.2rem;
+    color: #00114B 
+}
+
+.paragraph-image {
+    width: 100%;
+    height: 300px; /* Ensures equal image sizes */
+    object-fit: cover; /* Maintains aspect ratio and avoids distortion */
+    border-radius: 10px; /* Optional for a modern touch */
+    padding:0
+}
+
+@media screen and (max-width: 768px) {
+    .evenrow {
+        flex-direction: column-reverse;
+    }
+}

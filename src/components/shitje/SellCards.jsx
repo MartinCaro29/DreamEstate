@@ -12,14 +12,16 @@ const navigate = useNavigate();
       title: 'Shisni pronen tuaj',
       image: Img1,
       buttonText: 'Shisni pronen',
-      link: '/shisnipronen'
+      link: '/shisnipronen',
+      description: "Shisni pronën tuaj shpejt dhe me çmimin më të mirë duke përdorur platformën tonë profesionale!"
     },
     {
       id: 2,
       title: 'Vleresoni pronen tuaj',
       image: Img2,
       buttonText: 'Vleresoni pronen',
-      link: '/vleresonipronen'
+      link: '/vleresonipronen',
+      description: "Merrni një vlerësim të saktë dhe të shpejtë për pronën tuaj nga ekspertët tanë!"
     }
   ];
 
@@ -38,9 +40,7 @@ const navigate = useNavigate();
               <Card.Body className="d-flex flex-column">
                 <Card.Title className="shitje-title mb-3">{product.title}</Card.Title>
                 <Card.Text className="text-muted shitje-description mb-4">
-                  textextextextextextextextextexte
-                  xtextextextextextextextextextex
-                  textextextextextextextext
+                {product.description}
                 </Card.Text>
                 <div className="mt-auto">
                   <Button 

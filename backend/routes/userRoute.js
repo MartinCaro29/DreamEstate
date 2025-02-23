@@ -39,6 +39,97 @@ transporter.verify(function(error, success) {
   }
 });
 
+router.patch('/updateUser/:id', async (req, res) => {
+  try {
+    // Get allowed fields from request body
+    const { username, email, email_verified, role, remember_me_token } = req.body;
+
+    // Create update object with only allowed fields
+    const updateData = {};
+    if (username !== undefined) updateData.username = username;
+    if (email !== undefined) updateData.email = email;
+    if (email_verified !== undefined) updateData.email_verified = email_verified;
+    if (role !== undefined) updateData.role = role;
+    if (remember_me_token !== undefined) {
+      updateData.remember_me_token = remember_me_token;
+      updateData.remember_me_token_created_at = new Date();
+    }
+
+    // Find and update user, excluding password and created_at from the response
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { 
+        new: true, // Return updated document
+        runValidators: true, // Run schema validators
+        select: '-password -created_at' // Exclude password and created_at
+      }
+    );
+
+    // Check if user exists
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Return updated user data
+    res.status(200).json({
+      success: true,
+      data: updatedUser
+    });
+
+  } catch (error) {
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username or email already exists',
+        error: error.message
+      });
+    }
+
+    // Handle other errors
+    res.status(500).json({
+      success: false,
+      message: 'Error updating user',
+      error: error.message
+    });
+  }
+});
+
+router.get('/user/:id', async (req, res) => {
+  try {
+    // Find user by ID
+    const user = await userModel.findById(req.params.id)
+      .select('-password') // Exclude password from the response
+      .lean(); // Convert to plain JavaScript object
+
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Return user data
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+
+  } catch (error) {
+    // Handle invalid ID format or other errors
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving user',
+      error: error.message
+    });
+  }
+});
+
 // Register Route
 // Register Route
 router.post('/register', async (req, res) => {

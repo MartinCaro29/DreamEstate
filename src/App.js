@@ -19,6 +19,9 @@ import SellForm from './components/shitje/SellForm';
 import EstimatePrice from './components/shitje/EstimatePrice';
 import ForgotPassword from './components/auth/ForgotPassword';
 import axios from 'axios'
+import AboutUs from './components/aboutus/AboutUs';
+import Contact from './components/contact/Contact';
+import AccountMenu from './components/account/AccountMenu';
 
 const INACTIVITY_LIMIT = 10 * 60 * 1000; 
 const CHECK_INTERVAL = 10 * 1000; 
@@ -114,6 +117,9 @@ const App = () => {
       <Route path="/shisnipronen" element={<SellForm/>}/>
       <Route path="/vleresonipronen" element={<EstimatePrice/>}/>
       <Route path="/ndryshofjalekalimin" element={<ForgotPassword/>}/>
+      <Route path="/kushjemi" element={<AboutUs/>}/>
+      <Route path="/kontakt" element={<Contact/>}/>
+      <Route path="/llogaria" element={<AccountMenu/>}/>
       </Routes>
      
       </UserContextProvider>
