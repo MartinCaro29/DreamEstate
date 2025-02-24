@@ -34,41 +34,36 @@ const PropertyDetail = () => {
     useEffect(() => {
         const fetchFavoriteStatus = async () => {
             const userId = localStorage.getItem('userId');
-            if (!userId) {
+            if (!userId || !property) {
                 setIsFavorite(false);
                 return;
             }
     
             try {
-                if (!property) return; // Add check for `property` here
                 const response = await axios.get(`http://localhost:5000/favorites/${userId}`);
-                const favoritePropertyIds = response.data.map(fav =>
-                    fav.property_id?._id || fav.property_id
-                );
-                setIsFavorite(favoritePropertyIds.includes(property._id)); // Ensure `property._id` exists
+                const favoritePropertyIds = response.data.map(fav => fav.property_id?._id || fav.property_id);
+                setIsFavorite(favoritePropertyIds.includes(property._id));
             } catch (error) {
                 console.error('Error fetching favorites:', error);
                 setIsFavorite(false);
             }
         };
     
-        fetchFavoriteStatus();
-    }, [property?._id]); // Make sure `property` is not null or undefined when using _id
+        if (isAuthenticated && property?._id) {  // ✅ Run only if authenticated and property exists
+            fetchFavoriteStatus();
+        }
+    }, [property?._id, isAuthenticated]);  // ✅ Depend on `isAuthenticated`
     
 
 
     useEffect(() => {
         const fetchProperty = async () => {
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
-                setIsFavorite(false);
-                return;
-            }
             try {
                 const response = await axios.get(`http://localhost:5000/getOneProperty/${slug}`);
                 setProperty(response.data);
-
-                // Check if the property is in favorites
+    
+                // If authenticated, check if the property is in favorites
+                const userId = localStorage.getItem('userId');
                 if (userId) {
                     const favResponse = await axios.get(`http://localhost:5000/favorites/${userId}`);
                     const favoritePropertyIds = favResponse.data.map(fav => fav.property_id?._id || fav.property_id);
@@ -78,9 +73,10 @@ const PropertyDetail = () => {
                 console.error('Error fetching property:', error);
             }
         };
-
+    
         fetchProperty();
     }, [slug]);
+    
 
     useEffect(() => {
         const userId = localStorage.getItem('userId');

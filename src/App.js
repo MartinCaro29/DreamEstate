@@ -153,6 +153,7 @@ const App = () => {
                     <Route path="/kontakt" element={<Contact />} />
                     <Route path="/vleresonipronen" element={<EstimatePrice />} />
                     <Route path="/login" element={userId ? <Navigate to="/" /> : <Login />} />
+                    <Route path="/ndryshofjalekalimin" element={<ForgotPassword/>}/>
 
                     {/* ✅ Anonymous Routes */}
                     <Route element={<ProtectedRoute isAllowed={!userId} redirectTo="/" />}>

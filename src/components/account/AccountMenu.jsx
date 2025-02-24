@@ -164,6 +164,9 @@ const AccountMenu = () => {
                         </Button>
                       </>
                     )}
+                    <Button variant="primary" href={'/ndryshofjalekalimin'}>
+                        Harruat fjalëkalimin?
+                      </Button>
                   </div>
                 </Form>
               </Col>
