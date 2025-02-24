@@ -21,7 +21,8 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);  // New state for "Remember Me" checkbox
 
     useEffect(() => {
-        window.scrollTo(0, 0);  
+        window.scrollTo(0, 0); 
+        if(localStorage.getItem("loggedOut")) localStorage.removeItem("loggedOut"); 
       }, [])
     
 
@@ -84,31 +85,35 @@ const Login = () => {
     const handleVerifyEmail = async (e) => {
         e.preventDefault();
         setIsVerifying(true);
-
+    
         try {
             const response = await axios.post('http://localhost:5000/verify-email', {
                 email: userLog.email,
                 token: verificationCode,
             });
-
+    
             setAlert('success');
             setError('Email-i u verifikua me sukses! Po ridrejtoheni...');
-
+    
+            // Store the user info and ID after email verification
+            localStorage.setItem('userId', response.data.id);
+            setUserInfo(response.data); // Update context with the response data
+    
             setTimeout(() => {
-                setUserInfo(response.data);
-                navigate('/');
+                navigate('/'); // Redirect to home page or another page
             }, 2000);
-
+            
         } catch (err) {
             setIsVerifying(false);
             const errorMsg = err.response?.data === 'Token not found or expired.' ? 'Kodi i verifikimit nuk u gjet ose ka skaduar.' :
                 err.response?.data === 'Token has expired.' ? 'Kodi i verifikimit ka skaduar.' :
                 err.response?.data === 'Invalid token.' ? 'Kodi i verifikimit është i pavlefshëm.' :
                 'Gabim gjatë verifikimit. Ju lutemi provoni përsëri.';
-
+    
             handleError(errorMsg);
         }
     };
+    
 
     const handleResendCode = async () => {
         try {

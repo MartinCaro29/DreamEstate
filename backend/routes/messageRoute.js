@@ -109,4 +109,36 @@ router.get('/messages/user/:userId', async (req, res) => {
   }
 });
 
+router.get('/messages', async (req, res) => {
+    try {
+      const messages = await Message.find().sort({ createdAt: -1 }); // Get all messages, newest first
+      res.json({
+        success: true,
+        data: messages
+      });
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Pati një problem me marrjen e mesazheve'
+      });
+    }
+  });
+
+  router.delete('/deleteMessage/:id', async (req, res) => {
+    try {
+        const messageId = req.params.id;
+        const result = await Message.findByIdAndDelete(messageId);
+
+        if (!result) {
+            return res.status(404).json({ message: 'Mesazhi nuk u gjet!' });
+        }
+
+        res.status(200).json({ message: 'Mesazhi u fshi me sukses!' });
+    } catch (error) {
+        console.error('Gabim gjatë fshirjes së mesazhit:', error);
+        res.status(500).json({ message: 'Gabim serveri!' });
+    }
+});
+
 module.exports = router;

@@ -1,17 +1,19 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Navbar, Nav, Container, Dropdown, NavDropdown } from 'react-bootstrap';
 import { UserContext } from '../auth/UserContext';
 import './Navigation.css';
 import NavbarLogo from '../../images/dreamestatenav.png';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Navigation = () => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Blerje');
   const { userInfo, setUserInfo } = useContext(UserContext);
+  const [userRole, setUserRole] = useState(null); // State for user role
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem('userId')
+  const userId = localStorage.getItem('userId');
   // Keep "Shitje" in this array for the first dropdown
   const allCategories = [
     'Blerje',
@@ -27,11 +29,34 @@ const Navigation = () => {
     'Kerko ne harte'
   ];
 
+  useEffect(() => {
+    if (userId) {
+      // Fetch user role using the user ID when the component mounts
+      axios.get(`http://localhost:5000/user/${userId}`)
+        .then((response) => {
+          setUserRole(response.data.data.role); // Set the role in state
+        })
+        .catch((err) => {
+          console.error('Error fetching user role:', err);
+        });
+    }
+  }, [userId]);
+
   const handleLogout = () => {
-    localStorage.removeItem('userId');
-    setUserInfo({});
-    navigate('/login');
+    // Remove user ID from localStorage
+   
+    
+    // Temporarily delay the state update to ensure React properly handles the change
+    setTimeout(() => {
+       localStorage.removeItem('userId');
+       localStorage.removeItem("role"); // Remove role from localStorage on logou
+      setUserInfo({});  // Clear the user information
+      setUserRole(null); // Clear the user role
+      localStorage.setItem('loggedOut', true);
+      window.location.reload()
+    }, 800); 
   };
+  
 
   const handleSearch = () => {
     if (!selectedCategory) {
@@ -107,7 +132,11 @@ const Navigation = () => {
               ) : (
                 <>
                   <Nav.Link href="/llogaria">Llogaria</Nav.Link>
+                  {userRole === 'admin' && 
+                    <Nav.Link href="/admin">Admin</Nav.Link>
+                  }
                   <Nav.Link onClick={handleLogout}>Dilni</Nav.Link>
+                  
                 </>
               )}
             </Nav>

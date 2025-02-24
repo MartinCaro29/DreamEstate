@@ -22,6 +22,13 @@ import axios from 'axios'
 import AboutUs from './components/aboutus/AboutUs';
 import Contact from './components/contact/Contact';
 import AccountMenu from './components/account/AccountMenu';
+import AdminDashboard from './components/admin/AdminDashboard';
+import VerifyProperty from './components/admin/VerifyProperty';
+import UpdateProperty from './components/admin/UpdateProperty';
+import AddProperty from './components/admin/AddProperty';
+import ProtectedRoute from './components/auth/ProtectedRoute'; // Import the ProtectedRoute
+import { Navigate } from 'react-router-dom';
+
 
 const INACTIVITY_LIMIT = 10 * 60 * 1000; 
 const CHECK_INTERVAL = 10 * 1000; 
@@ -30,6 +37,8 @@ const App = () => {
     const navigate = useNavigate();
     const lastActivityRef = useRef(Date.now());
     const [userId, setUserId] = useState(localStorage.getItem("userId"));
+    const [user, setUser] = useState(null); // Store user details
+    const [role, setRole] = useState(localStorage.getItem("role")); 
     const [rememberToken, setRememberToken] = useState(null);
     
 
@@ -55,12 +64,27 @@ const App = () => {
         }
     };
 
+    const fetchUser = async (userId) => {
+      try {
+          const response = await axios.get(`http://localhost:5000/user/${userId}`);
+          const userData = response.data.data; 
+          setUser(userData);
+          setRole(userData.role); // Set role based on the response
+          localStorage.setItem("role", userData.role); // Store role in localStorage
+      } catch (error) {
+          console.error("Error fetching user:", error);
+      }
+  };
+
+
+
     useEffect(() => {
         if (userId) {
             const getToken = async () => {
                 await fetchRememberMeToken(userId);
             };
             getToken();
+            fetchUser(userId);
         }
     }, [userId]);
 
@@ -68,6 +92,21 @@ const App = () => {
         lastActivityRef.current = Date.now();
         console.log("✅ Activity detected! Resetting timer:", new Date().toLocaleTimeString());
     };
+   
+    useEffect(() => {
+      const userId = localStorage.getItem('userId');
+      const loggedOut = localStorage.getItem('loggedOut');
+  
+      // If the user is logged out or doesn't exist, navigate to the login page
+      if (!userId || loggedOut === 'true') {
+        // Remove the logged out flag after navigation
+        localStorage.removeItem('loggedOut');
+  
+        // Ensure navigation only happens once
+        navigate('/login', { replace: true }); // Use replace to avoid adding to history stack
+      }
+    }, []); // Empty dependency array ensures it runs only once, after initial mount
+    
 
     useEffect(() => {
         window.addEventListener("mousemove", resetActivity);
@@ -81,11 +120,12 @@ const App = () => {
 
             console.log(`⏳ Checking inactivity: ${timeSinceLastActivity / 1000}s`, {
                 hasUserId: !!userId,
+                isAdmin: role === "admin",
                lacksRememberToken: !rememberToken,
               
             });
 
-            if (userId && !rememberToken && timeSinceLastActivity > INACTIVITY_LIMIT) {
+            if (userId && !rememberToken && role !=="admin" && timeSinceLastActivity > INACTIVITY_LIMIT) {
                 console.warn("⚠️ User inactive for too long and no valid remember token! Logging out...");
                 localStorage.removeItem("userId");
                 setUserId(null);
@@ -103,28 +143,46 @@ const App = () => {
 
   return (
     <div className="App">
-      <UserContextProvider>
+      
+            <UserContextProvider>
+                <Routes>
+                    {/* ✅ Public Routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/blerje" element={<Blerje />} />
+                    <Route path="/qera" element={<MerrMeQera />} />
+                    <Route path="/property/:slug" element={<PropertyDetail />} />
+                    <Route path="/kerkoneharte" element={<FormAndMap />} />
+                    <Route path="/shitje" element={<Shitje />} />
+                    <Route path="/kushjemi" element={<AboutUs />} />
+                    <Route path="/kontakt" element={<Contact />} />
+                    <Route path="/vleresonipronen" element={<EstimatePrice />} />
+                    <Route path="/login" element={userId ? <Navigate to="/" /> : <Login />} />
 
-      <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/blerje" element={<Blerje/>} />
-      <Route path="/qera" element={<MerrMeQera/>} />
-      <Route path="/property/:slug" element={<PropertyDetail/>} />
-      <Route path="/kerkoneharte" element={<FormAndMap/>}/>
-      <Route path="/shitje" element={<Shitje/>}/>
-      <Route path="/shisnipronen" element={<SellForm/>}/>
-      <Route path="/vleresonipronen" element={<EstimatePrice/>}/>
-      <Route path="/ndryshofjalekalimin" element={<ForgotPassword/>}/>
-      <Route path="/kushjemi" element={<AboutUs/>}/>
-      <Route path="/kontakt" element={<Contact/>}/>
-      <Route path="/llogaria" element={<AccountMenu/>}/>
-      </Routes>
-     
-      </UserContextProvider>
+                    {/* ✅ Anonymous Routes */}
+                    <Route element={<ProtectedRoute isAllowed={!userId} redirectTo="/" />}>
+                        
+                        <Route path="/register" element={<Register />} />
+                    </Route>
 
-    </div>
+                    {/* ✅ Authenticated Routes */}
+                    <Route element={<ProtectedRoute isAllowed={!!userId} redirectTo="/login" />}>
+                        <Route path="/shisnipronen" element={<SellForm />} />
+                        <Route path="/llogaria" element={<AccountMenu />} />
+                    </Route>
+
+                    {/* ✅ Admin-Only Routes */}
+                    <Route element={<ProtectedRoute isAllowed={role === 'admin'} redirectTo="/" />}>
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/verify-property/:id" element={<VerifyProperty />} />
+                        <Route path="/update-property/:id" element={<UpdateProperty />} />
+                        <Route path="/addProperty" element={<AddProperty />} />
+                    </Route>
+
+                    {/* Redirect all unknown routes */}
+                    <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+            </UserContextProvider>
+        </div>
   );
 }
 

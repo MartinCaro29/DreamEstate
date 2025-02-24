@@ -38,19 +38,19 @@ app.get('/getAgent/:id', async (req, res) => {
 // Add a new agent (accept form-data)
 app.post('/addAgent', upload.none(), async (req, res) => {
   try {
-    const { name, surname, email, phone_number, experience, rating } = req.body;
+    const { name, surname, email, phone_number, startYear, rating } = req.body;
 
     // Validate required fields
-    if (!name || !surname || !email || !phone_number || !experience || !rating) {
+    if (!name || !surname || !email || !phone_number || !startYear || !rating) {
       return res.status(400).send('Missing required fields');
     }
 
     // Convert form-data fields to appropriate types
-    const parsedExperience = parseInt(experience);
+    const parsedstartYear = parseInt(startYear);
     const parsedRating = parseFloat(rating);
 
-    if (isNaN(parsedExperience) || isNaN(parsedRating)) {
-      return res.status(400).send('Experience and rating must be numbers');
+    if (isNaN(parsedstartYear) || isNaN(parsedRating)) {
+      return res.status(400).send('startYear and rating must be numbers');
     }
 
     const newAgent = new Agent({
@@ -58,7 +58,7 @@ app.post('/addAgent', upload.none(), async (req, res) => {
       surname,
       email,
       phone_number,
-      experience: parsedExperience,
+      startYear: parsedstartYear,
       rating: parsedRating,
     });
 
@@ -75,11 +75,11 @@ app.patch('/updateAgent/:id', upload.none(), async (req, res) => {
     const agentId = req.params.id;
     const updates = { ...req.body };
 
-    // Convert experience and rating to appropriate types if provided
-    if (updates.experience) {
-      updates.experience = parseInt(updates.experience);
-      if (isNaN(updates.experience)) {
-        return res.status(400).send('Experience must be a number');
+    // Convert startYear and rating to appropriate types if provided
+    if (updates.startYear) {
+      updates.startYear = parseInt(updates.startYear);
+      if (isNaN(updates.startYear)) {
+        return res.status(400).send('startYear must be a number');
       }
     }
 

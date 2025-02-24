@@ -39,65 +39,187 @@ transporter.verify(function(error, success) {
   }
 });
 
+const sendUpdateEmail = async (email, isAdminUpdate, newRole = null) => {
+  let subject;
+  let message;
+
+  if (newRole) {
+    subject = 'Roli juaj është ndryshuar';
+    message = `
+      Përshëndetje, <br><br>
+      Një administrator ka ndryshuar rolin tuaj. Roli juaj i ri tani është: <b>${newRole}</b>.
+      <br><br>
+      Nëse nuk e keni kërkuar këtë ndryshim, ju lutemi kontaktoni mbështetjen menjëherë.
+      <br><br>
+      Faleminderit!
+    `;
+  } else {
+    subject = isAdminUpdate ? 'Administratori ka ndryshuar profilin tuaj' : 'Profili juaj është përditësuar';
+    message = `
+      Përshëndetje, <br><br>
+      ${isAdminUpdate 
+        ? 'Një administrator ka përditësuar informacionin e profilit tuaj.' 
+        : 'Ju keni përditësuar profilin tuaj me sukses.'}
+      <br><br>
+      ${
+        isAdminUpdate 
+          ? 'Nëse nuk e keni kërkuar këtë ndryshim, ju lutemi kontaktoni mbështetjen menjëherë.' 
+          : 'Nëse nuk e keni bërë këtë ndryshim, ju lutemi kontrolloni llogarinë tuaj.' 
+      }
+      <br><br>
+      <b>Vërejtje:</b> Nëse adresa juaj e email-it është ndryshuar, funksionaliteti "Më mbaj mend" nuk është më aktiv. Ju duhet të verifikoni përsëri email-in tuaj.
+      <br><br>
+      Faleminderit!
+    `;
+  }
+
+  await transporter.sendMail({
+    from: 'electroman784@gmail.com',
+    to: email,
+    subject: subject,
+    html: message
+  });
+};
+
+// Route: Update User (Normal User)
+// Route: Update User (Normal User)
 router.patch('/updateUser/:id', async (req, res) => {
   try {
-    // Get allowed fields from request body
     const { username, email, email_verified, role, remember_me_token } = req.body;
 
-    // Create update object with only allowed fields
     const updateData = {};
+    
     if (username !== undefined) updateData.username = username;
-    if (email !== undefined) updateData.email = email;
-    if (email_verified !== undefined) updateData.email_verified = email_verified;
+
+    // If the email is updated, set email_verified to 0
+    if (email !== undefined) {
+      updateData.email = email;
+      updateData.email_verified = 0;  // Set email_verified to 0 when email is updated
+      updateData.remember_me_token = null;
+      updateData.remember_me_token_created_at = null;
+    } else if (email_verified !== undefined) {
+      updateData.email_verified = email_verified;
+    }
+
     if (role !== undefined) updateData.role = role;
+
     if (remember_me_token !== undefined) {
       updateData.remember_me_token = remember_me_token;
       updateData.remember_me_token_created_at = new Date();
     }
 
-    // Find and update user, excluding password and created_at from the response
     const updatedUser = await userModel.findByIdAndUpdate(
       req.params.id,
       { $set: updateData },
-      { 
-        new: true, // Return updated document
-        runValidators: true, // Run schema validators
-        select: '-password -created_at' // Exclude password and created_at
-      }
+      { new: true, runValidators: true, select: '-password -created_at' }
     );
 
-    // Check if user exists
     if (!updatedUser) {
+      return res.status(404).json({ success: false, message: 'Përdoruesi nuk u gjet' });
+    }
+
+    // Send the update email to the user (including email verification status)
+    await sendUpdateEmail(updatedUser.email, false);  // False because it's not an admin update
+
+    res.status(200).json({ success: true, data: updatedUser });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: 'Emri i përdoruesit ose email-i ekziston tashmë', error: error.message });
+    }
+    res.status(500).json({ success: false, message: 'Gabim gjatë përditësimit të përdoruesit', error: error.message });
+  }
+});
+
+
+// Route: Update User by Admin
+router.patch('/updateUserByAdmin/:id', async (req, res) => {
+  try {
+    const { username, email, email_verified, role } = req.body;
+
+    const updateData = {};
+    if (username !== undefined) updateData.username = username;
+
+    if (email !== undefined) {
+      updateData.email = email;
+      updateData.email_verified = 0;  // Set email_verified to 0 when email is updated
+      updateData.remember_me_token = null;
+      updateData.remember_me_token_created_at = null;
+    } else if (email_verified !== undefined) {
+      updateData.email_verified = email_verified;
+    }
+
+    // Fetch current user to check if the role is changed
+    const currentUser = await userModel.findById(req.params.id);
+    if (!currentUser) {
+      return res.status(404).json({ success: false, message: 'Përdoruesi nuk u gjet' });
+    }
+
+    let roleChanged = false;
+    if (role !== undefined && currentUser.role !== role) {
+      updateData.role = role;
+      roleChanged = true;
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true, runValidators: true, select: '-password -created_at' }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: 'Përdoruesi nuk u gjet' });
+    }
+
+    // Send the update email to the user
+    await sendUpdateEmail(updatedUser.email, false);  // False because it's not an admin update
+
+    // If the admin is updating the profile, also send email to the admin
+    if (roleChanged) {
+      await sendUpdateEmail(updatedUser.email, true, updatedUser.role);  // Admin update with role change
+    } else {
+      await sendUpdateEmail(updatedUser.email, true);  // Admin update without role change
+    }
+
+    res.status(200).json({ success: true, data: updatedUser });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: 'Emri i përdoruesit ose email-i ekziston tashmë', error: error.message });
+    }
+    res.status(500).json({ success: false, message: 'Gabim gjatë përditësimit të përdoruesit', error: error.message });
+  }
+});
+
+router.get('/users', async (req, res) => {
+  try {
+    // Fetch all users excluding their passwords
+    const users = await userModel.find()
+      .select('-password') // Exclude password from response
+      .lean(); // Convert to plain JavaScript objects
+
+    // Check if there are users
+    if (!users || users.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'No users found'
       });
     }
 
-    // Return updated user data
+    // Return users list
     res.status(200).json({
       success: true,
-      data: updatedUser
+      data: users
     });
 
   } catch (error) {
-    // Handle specific MongoDB errors
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username or email already exists',
-        error: error.message
-      });
-    }
-
-    // Handle other errors
+    // Handle errors
     res.status(500).json({
       success: false,
-      message: 'Error updating user',
+      message: 'Error retrieving users',
       error: error.message
     });
   }
 });
+
 
 router.get('/user/:id', async (req, res) => {
   try {
@@ -130,6 +252,55 @@ router.get('/user/:id', async (req, res) => {
   }
 });
 
+router.delete('/deleteUser/:id', async (req, res) => {
+  try {
+    // Find the user by ID to get their email before deleting
+    const user = await userModel.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Përdoruesi nuk u gjet'
+      });
+    }
+
+    // Delete the user from the database
+    await userModel.findByIdAndDelete(req.params.id);
+
+    // Send email after successful deletion
+    const mailOptions = {
+      from: 'electroman784@gmail.com', // Sender address
+      to: user.email, // Recipient address (user's email)
+      subject: 'Llogaria Juaj është Fshirë', // Email subject in Albanian
+      text: 'Përshëndetje, \n\nLlogaria juaj është fshirë nga platforma jonë. Nëse nuk keni kërkuar këtë veprim, ju lutemi na kontaktoni sa më shpejt. \n\nFaleminderit!' // Email body in Albanian
+    };
+
+    // Send email using the transporter
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Gabim gjatë dërgimit të email-it:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Gabim gjatë dërgimit të email-it',
+          error: error.message
+        });
+      }
+      console.log('Email i dërguar: ' + info.response);
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Përdoruesi u fshi me sukses'
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Gabim gjatë fshirjes së përdoruesit',
+      error: error.message
+    });
+  }
+});
 // Register Route
 // Register Route
 router.post('/register', async (req, res) => {
@@ -214,29 +385,30 @@ router.post('/register', async (req, res) => {
 
 // Verify Email Route
 router.post('/verify-email', async (req, res) => {
-  const { email, token } = req.body;
+  const { email } = req.body;
 
-  if (!verificationTokens[email]) {
-    return res.status(400).send('Token not found or expired.');
+  // Find user by email
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    return res.status(400).send('User not found.');
   }
 
-  const { token: storedToken, expires } = verificationTokens[email];
-
-  if (Date.now() > expires) {
-    delete verificationTokens[email];
-    return res.status(400).send('Token has expired.');
+  if (user.email_verified === 1) {
+    return res.status(400).send('Email already verified.');
   }
 
-  if (storedToken !== token) {
-    return res.status(400).send('Invalid token.');
-  }
-
-  // Token is valid; mark the user as verified
+  // Mark the user as verified
   await userModel.findOneAndUpdate({ email }, { email_verified: 1 });
 
-  delete verificationTokens[email];
-  res.status(200).send('Email verified successfully.');
+  res.status(200).json({
+    id: user._id, // Send the user's ID in the response
+    email: user.email,
+    email_verified: 1,
+  });
 });
+
+
 
 
 router.post('/login', async (req, res) => {

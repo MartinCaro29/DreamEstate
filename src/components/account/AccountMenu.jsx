@@ -74,10 +74,13 @@ const AccountMenu = () => {
   const handleSaveChanges = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      await axios.patch(`http://localhost:5000/updateUser/${userId}`, {
+      // Include email_verified as 0 when the email is updated
+      const response = await axios.patch(`http://localhost:5000/updateUser/${userId}`, {
         username: userInfo.username,
+        email: userInfo.email,  // Send email change too
+        email_verified: 0,      // Explicitly set email_verified to 0 here
       });
-
+  
       setMessage({ text: 'Të dhënat u përditësuan me sukses!', type: 'success' });
       setIsEditing(false);
       setOriginalInfo(userInfo);
@@ -85,6 +88,7 @@ const AccountMenu = () => {
       setMessage({ text: 'Gabim gjatë përditësimit të të dhënave.', type: 'danger' });
     }
   };
+  
 
   const handleRevertChanges = () => {
     setUserInfo(originalInfo);
@@ -132,7 +136,12 @@ const AccountMenu = () => {
 
                   <Form.Group className="mb-3">
                     <Form.Label style={{ display: 'block' }} className="me-auto">Email</Form.Label>
-                    <Form.Control type="email" value={userInfo.email} disabled />
+                    <Form.Control
+                      type="email"
+                      value={userInfo.email}
+                      onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                      disabled={!isEditing}
+                    />
                   </Form.Group>
 
                   <Form.Group className="mb-4">
