@@ -96,17 +96,13 @@ const App = () => {
     useEffect(() => {
       const userId = localStorage.getItem('userId');
       const loggedOut = localStorage.getItem('loggedOut');
-  
-      // If the user is logged out or doesn't exist, navigate to the login page
-      if (!userId || loggedOut === 'true') {
-        // Remove the logged out flag after navigation
-        localStorage.removeItem('loggedOut');
-  
-        // Ensure navigation only happens once
-        navigate('/login', { replace: true }); // Use replace to avoid adding to history stack
+
+      // Ensure login redirection only happens if loggedOut flag is true
+      if (!userId && loggedOut === 'true') {
+          localStorage.removeItem('loggedOut');
+          navigate('/login', { replace: true });
       }
-    }, []); // Empty dependency array ensures it runs only once, after initial mount
-    
+  }, []);
 
     useEffect(() => {
         window.addEventListener("mousemove", resetActivity);
